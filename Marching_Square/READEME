@@ -1,0 +1,14 @@
+此demo的作用，是说明Marching Square如何找到连通区域的外包线。
+version0.1：简单的去边界线的中点作为分界点，进一步可以通过线性插值来确定准确的等值线与边所相交的点的坐标
+但由于测试数据是mask数据，无法进行后续的操作。
+
+补充：原始代码是从 https://www.freesion.com/article/52381128617/ 上拷贝过来的，但在运行过程中发现了几处问题，
+将讲原理弄懂之后，发现问题所在。
+Marching_Square.py
+P136行： if bitval == 1 or 14:  应该为   if bitval == 1 or bitval == 14:
+
+P143行： return (1, 0, 0.5, 1, 0.5, None, None, None, None)  应该为  return (1, 0.5, 0, 1, 0.5, None, None, None, None)
+
+P78 84 89行：绘图的正确代码是  plot([x1, x2],[y1, y2], 'r-')
+
+Date:2021年12月23日 15:29
