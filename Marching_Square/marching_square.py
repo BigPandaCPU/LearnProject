@@ -58,35 +58,98 @@ class PlotDemo:
 
         net = self._net
         utils = MarchSquareUtlis(net)
-        lines = utils.trancing_contours()
+        lines, line_points = utils.trancing_contours()
+        for line_point in line_points:
+            x1 = line_point[0][0]
+            y1 = line_point[0][1]
+            x2 = line_point[1][0]
+            y2 = line_point[1][1]
+            #plot([x1, x2], [y1, y2], 'r-')
 
-        width, height = net.net_info.shape
-        arr = net.net_info
-        idx = 0
-        for i in range(width - 1):
-            for j in range(height - 1):
-                x, y = i, j
-                count, v1, v2, v3, v4, v5, v6, v7, v8 = lines[idx]
-                idx = idx + 1
-                if count == 0:
-                    continue
-                if count == 1:
-                    x1 = x + v1
-                    y1 = y + v2
-                    x2 = x + v3
-                    y2 = y + v4
-                    plot([x1, x2],[y1, y2], 'r-')
-                if count == 2:
-                    x1 = x + v1
-                    y1 = y + v2
-                    x2 = x + v3
-                    y2 = y + v4
-                    plot([x1, x2],[y1, y2], 'r-')
-                    x1 = x + v5
-                    y1 = y + v6
-                    x2 = x + v7
-                    y2 = y + v8
-                    plot([x1, x2],[y1, y2], 'r-')
+        bool_points = np.ones( len(line_points) )
+        curve_lines = []
+        for i in range(len(line_points)):
+            if bool_points[i]:
+                cur_curve = []
+                cur_point1 = line_points[i][0]
+                cur_point2 = line_points[i][1]
+                cur_curve.append(cur_point1)
+                cur_curve.append(cur_point2)
+                bool_points[i] = False
+                j = i+1
+                while(j < len(line_points)):
+                    if bool_points[j]:
+                        tmp_point = line_points[j]
+                        if cur_point1 in line_points[j]:
+                            if cur_point1 == line_points[j][0]:
+                                cur_curve.insert(0, line_points[j][1])
+                            else:
+                                cur_curve.insert(0, line_points[j][0])
+                            cur_point1 = cur_curve[0]
+                            cur_point2 = cur_curve[-1]
+                            bool_points[j] = False
+                            j=i+1
+                            print("cur_curve:", len(cur_curve))
+                            if( len(cur_curve) == 9):
+                                print("done")
+                            continue
+
+                        if cur_point2 in line_points[j]:
+                            if cur_point2 == line_points[j][0]:
+                                cur_curve.insert(-1, line_points[j][1])
+                            else:
+                                cur_curve.insert(-1, line_points[j][0])
+                            cur_point1 = cur_curve[0]
+                            cur_point2 = cur_curve[-1]
+                            bool_points[j] = False
+                            j =i+1
+                            print("cur_curve:", len(cur_curve))
+                            if( len(cur_curve) == 9):
+                                print("done")
+                            continue
+                        j +=1
+                    else:
+                        j +=1
+                curve_lines.append(cur_curve)
+        for curve_line in curve_lines:
+            cur_line = np.array(curve_line)
+            plot(cur_line[:,0], cur_line[:,1], 'r-')
+            print(cur_line)
+            #break
+        #print(curve_lines)
+
+
+
+
+
+
+        # width, height = net.net_info.shape
+        # arr = net.net_info
+        # idx = 0
+        # for i in range(width - 1):
+        #     for j in range(height - 1):
+        #         x, y = i, j
+        #         count, v1, v2, v3, v4, v5, v6, v7, v8 = lines[idx]
+        #         idx = idx + 1
+        #         if count == 0:
+        #             continue
+        #         if count == 1:
+        #             x1 = x + v1
+        #             y1 = y + v2
+        #             x2 = x + v3
+        #             y2 = y + v4
+        #             plot([x1, x2],[y1, y2], 'r-')
+        #         if count == 2:
+        #             x1 = x + v1
+        #             y1 = y + v2
+        #             x2 = x + v3
+        #             y2 = y + v4
+        #             plot([x1, x2],[y1, y2], 'r-')
+        #             x1 = x + v5
+        #             y1 = y + v6
+        #             x2 = x + v7
+        #             y2 = y + v8
+        #             plot([x1, x2],[y1, y2], 'r-')
         show()
 
     def set_net_info(self, net_info):
@@ -157,6 +220,7 @@ class MarchSquareUtlis(object):
         self.net = net
 
     def trancing_contours(self):
+        lines = []
         ret = []
         width, height = self.net.net_info.shape
         arr = self.net.net_info
@@ -168,8 +232,31 @@ class MarchSquareUtlis(object):
                 v4 = int(arr[i][j + 1])
                 bitv = get_retangle_bit(v1, v2, v3, v4)
                 net_shift = get_retangle_shift(bitv)
+
+                count, v1, v2, v3, v4, v5, v6, v7, v8 = net_shift
+
+
+                if count == 1:
+                    x1 = i + v1
+                    y1 = j + v2
+                    x2 = i + v3
+                    y2 = j + v4
+                    lines.append([[x1, y1], [x2, y2]])
+                if count == 2:
+                    x1 = i + v1
+                    y1 = j + v2
+                    x2 = i + v3
+                    y2 = j + v4
+                    lines.append([[x1, y1], [x2, y2]])
+
+                    x1 = i + v5
+                    y1 = j + v6
+                    x2 = i + v7
+                    y2 = j + v8
+                    lines.append([[x1, y1], [x2, y2]])
+
                 ret.append(net_shift)
-        return ret
+        return ret, lines
 
 
 demo = PlotDemo(100, 100)

@@ -12,3 +12,7 @@ P143行： return (1, 0, 0.5, 1, 0.5, None, None, None, None)  应该为  return
 P78 84 89行：绘图的正确代码是  plot([x1, x2],[y1, y2], 'r-')
 
 Date:2021年12月23日 15:29
+
+
+version0.2
+提取出连续的边界线的点
