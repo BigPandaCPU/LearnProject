@@ -55,6 +55,7 @@ class PlotDemo:
             for j in range(ylen):
                 if net[i][j] > 0:
                     plot(i, j, 'g+')
+        #show()
 
         net = self._net
         utils = MarchSquareUtlis(net)
@@ -90,22 +91,18 @@ class PlotDemo:
                             bool_points[j] = False
                             j=i+1
                             print("cur_curve:", len(cur_curve))
-                            if( len(cur_curve) == 9):
-                                print("done")
                             continue
 
                         if cur_point2 in line_points[j]:
                             if cur_point2 == line_points[j][0]:
-                                cur_curve.insert(-1, line_points[j][1])
+                                cur_curve.append(line_points[j][1])
                             else:
-                                cur_curve.insert(-1, line_points[j][0])
+                                cur_curve.append(line_points[j][0])
                             cur_point1 = cur_curve[0]
                             cur_point2 = cur_curve[-1]
                             bool_points[j] = False
                             j =i+1
                             print("cur_curve:", len(cur_curve))
-                            if( len(cur_curve) == 9):
-                                print("done")
                             continue
                         j +=1
                     else:
@@ -173,12 +170,17 @@ class RandomGenNet(object):
 
     def add_circle(self, center_x, center_y, radius, val):
         r = int(radius + 0.5)
-        for x in range(center_x - r, center_x + r):
+        m,n = self.arr.shape
+        x_min = np.max([0,center_x - r])
+        x_max = np.min([center_x + r, m])
+        for x in range(x_min, x_max):
             rx = np.abs(center_x - x)
             ry = int(np.sqrt(radius * radius - rx * rx))
             for y in range(ry):
-                self.arr[x][center_y - y] = val
-                self.arr[x][center_y + y] = val
+                if center_y-y>=0 and center_y-y < n:
+                    self.arr[x][center_y - y] = val
+                if center_y+y >=0 and center_y+y <n:
+                    self.arr[x][center_y + y] = val
         return
 
     def add_retangle(self, lf_up_x, lf_up_y, width, height, val):
@@ -263,8 +265,9 @@ demo = PlotDemo(100, 100)
 netinfo = RandomGenNet(100, 100)
 netinfo.add_circle(20, 20, 10, 1)
 netinfo.add_circle(70, 50, 20, 1)
+netinfo.add_circle(99, 0, 20, 1)
 netinfo.add_retangle(20, 45, 40, 20, 1)
-#netinfo.add_retangle(70, 50, 10, 10, 1)
+netinfo.add_retangle(70, 50, 10, 10, 1)
 
 demo.set_net_info(netinfo)
 #demo.show_source()
