@@ -110,6 +110,10 @@ class PlotDemo:
                 curve_lines.append(cur_curve)
         for curve_line in curve_lines:
             cur_line = np.array(curve_line)
+            for j in range(5):
+                for i in range(cur_line.shape[0]):
+                    if i>0 and i < cur_line.shape[0]-1:
+                        cur_line[i][0] = (cur_line[i-1][0] + curve_line[i][0] + curve_line[i+1][0])/3.0
             plot(cur_line[:,0], cur_line[:,1], 'r-')
             print(cur_line)
             #break
