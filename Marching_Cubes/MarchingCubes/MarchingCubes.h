@@ -1,5 +1,6 @@
 #pragma once
 #include<iostream>
+#include<vector>
 
 typedef struct
 {
@@ -25,4 +26,4 @@ typedef struct
 int PolygoniseCube(GRIDCELL, double, TRIANGLE*);
 XYZ VertexInterp(double, XYZ, XYZ, double, double);
 
-bool ExportFileSTLBinary(std::string filePath, const std::string & headerInfo, const TRIANGLE *tri, const int& triangleCount);
+bool ExportFileSTLBinary(std::string filePath, const std::string & headerInfo, const std::vector<TRIANGLE> &tri, const int& triangleCount);

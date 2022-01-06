@@ -485,7 +485,7 @@ XYZ VertexInterp(double isolevel, XYZ p1, XYZ p2, double valp1, double valp2)
 	return (p);
 }
 
-bool ExportFileSTLBinary(std::string filePath, const std::string & headerInfo, const TRIANGLE *tri, const int& triangleCount)
+bool ExportFileSTLBinary(std::string filePath, const std::string & headerInfo, const std::vector<TRIANGLE>& tri, const int& triangleCount)
 {
 	std::ofstream fileOut(filePath, std::ios::binary);
 

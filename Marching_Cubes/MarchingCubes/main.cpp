@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<math.h>
+#include<vector>
 #include"MarchingCubes.h"
 
 
@@ -16,7 +17,8 @@ int main(int argc, char **argv)
 	short int isolevel = 128, themin = 0, themax = 255;
 	GRIDCELL grid;
 	TRIANGLE triangles[10];
-	TRIANGLE *tri = NULL;
+	//TRIANGLE *tri = NULL;
+	std::vector<TRIANGLE> tri;
 
 	int ntri = 0;
 	FILE *fptr;
@@ -124,10 +126,11 @@ int main(int argc, char **argv)
 				grid.val[7] = data[i][j+1][k+1];
 
 				n = PolygoniseCube(grid, isolevel, triangles);
-				tri = (TRIANGLE*)realloc(tri, (ntri + n) * sizeof(TRIANGLE));
+				//tri = (TRIANGLE*)realloc(tri, (ntri + n) * sizeof(TRIANGLE)); //这里每次都要realloc，不是很好
 				for (l = 0; l < n; l++)
 				{
-					tri[ntri + l] = triangles[l];
+					//tri[ntri + l] = triangles[l];
+					tri.push_back(triangles[l]);
 				}
 				ntri += n;
 			}
@@ -158,8 +161,8 @@ int main(int argc, char **argv)
 		}
 		fprintf(fptr, "0.5 0.5 0.5\n");
 	}
-	fclose(fptr);
+	fclose(fptr);*/
 	system("pause");
-	exit(0);*/
+	exit(0);
 }
 
