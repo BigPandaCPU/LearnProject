@@ -12,12 +12,14 @@
 namespace delaunay 
 {
     constexpr double eps = 1e-4;
+    typedef float PointOut[2];
     struct Point 
 	{
         float x, y;
 
-        Point() : x{ 0 }, y{ 0 } {}
+        Point() : x{ 0.0 }, y{ 0.0 } {}
         Point(float _x, float _y) : x{ _x }, y{ _y } {}
+        Point(const Point& p):x(p.x),y(p.y){}
 
 
         friend std::ostream& operator<<(std::ostream& os, const Point& p)
@@ -83,7 +85,7 @@ namespace delaunay
 
             const auto m = p1.x * p1.x - p0.x * p0.x + p1.y * p1.y - p0.y * p0.y;
             const auto u = p2.x * p2.x - p0.x * p0.x + p2.y * p2.y - p0.y * p0.y;
-            const auto s = 1. / (2. * (ax * by - ay * bx));
+            const auto s = 1. / (2.0 * (ax * by - ay * bx));
 
             circle.x = ((p2.y - p0.y) * m + (p0.y - p1.y) * u) * s;
             circle.y = ((p0.x - p2.x) * m + (p1.x - p0.x) * u) * s;
@@ -93,15 +95,19 @@ namespace delaunay
             circle.radius = dx * dx + dy * dy;
         }
     };
+    struct TriangleOut
+    {
+        Point p0, p1, p2;
+        TriangleOut(const Point& _p0, const Point& _p1, const Point& _p2):p0(_p0),p1(_p1),p2(_p2){}
+        TriangleOut(const TriangleOut& tri):p0(tri.p0),p1(tri.p1),p2(tri.p2){}
+    };
 
     struct Delaunay
     {
         std::vector<Triangle> triangles;
         std::vector<Edge> edges;
-    }
-	
-	struct DelaunayOut
-	{}
+    };
 
     Delaunay triangulate(const Point* points, int num_point, int dim=2);
+}
     
