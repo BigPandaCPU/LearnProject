@@ -1,0 +1,28 @@
+﻿  ICP.cpp
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.h(49,21): warning C4018: “<”: 有符号/无符号不匹配
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.h(178,13): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.h(179,50): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.h(180,50): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.cpp(14,20): warning C4018: “<”: 有符号/无符号不匹配
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.cpp(35,24): warning C4305: “初始化”: 从“double”到“float”截断
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.cpp(40,22): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.cpp(103,21): warning C4018: “<”: 有符号/无符号不匹配
+  KdTree.cpp
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\KdTree.cpp(146,11): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\KdTree.cpp(189,15): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\KdTree.cpp(209,6): warning C4101: “i”: 未引用的局部变量
+  main.cpp
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.h(49,21): warning C4018: “<”: 有符号/无符号不匹配
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.h(178,13): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.h(179,50): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\ICP.h(180,50): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\main.cpp(26,20): warning C4018: “<”: 有符号/无符号不匹配
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\main.cpp(60,20): warning C4018: “<”: 有符号/无符号不匹配
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\main.cpp(67,20): warning C4018: “<”: 有符号/无符号不匹配
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\main.cpp(77,20): warning C4018: “<”: 有符号/无符号不匹配
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\main.cpp(84,20): warning C4018: “<”: 有符号/无符号不匹配
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\main.cpp(97,1): warning C4326: “main”的返回类型应为“int”而非“void”
+  svd.cpp
+  正在生成代码...
+D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\KdTree.cpp(102): warning C4715: “gs::KdTree::getNextSortOn”: 不是所有的控件路径都返回值
+  ICP.vcxproj -> D:\wangxiong\PyProject\LearnProject\ICP_C++\ICP\Debug\ICP.exe
