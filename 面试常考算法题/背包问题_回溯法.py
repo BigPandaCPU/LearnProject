@@ -1,14 +1,17 @@
 import numpy as np
+import copy
 def backpack_solover(weights, values, backpack_volume):
     assert len(weights) == len(values)
 
     used = [False]*len(weights)
     max_value = 0
-
-    def back_tracking(used):
+    path = used
+    def back_tracking(used, max_value):
+        global path
+        print(path)
         num = len(used)
         if sum(weights*used) > backpack_volume:
-            return
+            return max_value
 
         for i in range(num):
             if (used[i]):
@@ -16,20 +19,19 @@ def backpack_solover(weights, values, backpack_volume):
             elif sum(weights*used) > backpack_volume:
                 break
             else:
-                print("max_value:", max_value)
+                if max_value < sum(values*used):
+                    path = copy.deepcopy(used)
+                    print(used)
+                max_value = max(max_value, sum(values*used))
 
-                tmp = sum(values*used)
-                if(max_value < tmp):
-                    max_value = tmp
-
-                #max_value = max(max_value, sum(values*used))
                 used[i] = True
-                #back_tracking(used)
+                max_value = back_tracking(used, max_value)
             used[i] = False
-        return
+        return max_value
 
-    back_tracking(used)
-    return
+    max_value = back_tracking(used, max_value)
+    print("path=",path)
+    return max_value
 
 
 if __name__=="__main__":
