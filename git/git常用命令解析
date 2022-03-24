@@ -1,0 +1,21 @@
+文字参考：https://blog.csdn.net/on2way/article/details/78682225
+视频讲解参考：https://www.bilibili.com/video/BV1XP4y147v1?p=8&spm_id_from=pageDriver
+
+常用命令解析：
+1.配置用户信息
+$ git config --global user.name "John Doe"
+$ git config --global user.email johndoe@example.com
+
+2.查看配置信息
+git config list
+
+...
+credential.helper=manager-core
+credential.https://dev.azure.com.usehttppath=true
+user.email=******@qq.com
+user.name=*****
+...
+
+3.查看当前文件状态
+git status
+
