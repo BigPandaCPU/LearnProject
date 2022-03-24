@@ -18,4 +18,32 @@ user.name=*****
 
 3.查看当前文件状态
 git status
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean
+
+显示有文件commit，但是没有push
+
+4.版本回退
+git add . 操作之后，想撤销， git reset HEAD
+
+git reset --hard HEAD~2 当前版本基础上回退两个
+
+git reset --hard 879d7 切换到指定版本
+
+5. 查看log
+git log -5 --pretty=oneline  查看最近的5条log
+git reflog   查看版本变化
+2d32ac5 (HEAD -> master) HEAD@{0}: commit: git学习笔记
+6b5be72 (origin/master, origin/HEAD) HEAD@{1}: reset: moving to 6b5be72
+6b5be72 (origin/master, origin/HEAD) HEAD@{2}: reset: moving to 6b5be72
+7e949e8 HEAD@{3}: reset: moving to HEAD~2
+78f7978 HEAD@{4}: reset: moving to HEAD~3
+6b5be72 (origin/master, origin/HEAD) HEAD@{5}: reset: moving to 6b5be72
+132595d HEAD@{6}: reset: moving to HEAD~2
+6b5be72 (origin/master, origin/HEAD) HEAD@{7}: commit: 修改readme
+bc62347 HEAD@{8}: commit: 背包问题，回溯算法求解，求解最佳方案时，全局的path变量会出错
+132595d HEAD@{9}: commit: leetcode整数拆分算法
 
