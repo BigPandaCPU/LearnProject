@@ -62,7 +62,7 @@ git init
 git add README.md
 git commit -m "first commit"
 git branch -M main  # m命名为main分支
-git remote add origin git@github.com:BigPandaCPU/GitLearn.git 将本地仓促和远端仓库关联
+git remote add origin git@github.com:BigPandaCPU/GitLearn.git 将本地仓促和远端仓库关联  #添加远程仓库
 git push -u origin main  #将本地保存，提交到远程仓库
 
 8.ssh生成公钥和私钥
@@ -110,3 +110,48 @@ git branch -vv
     5）git push origin tag_name #将本地标签推送到远程
     6）git push origin --tags #将所有标签推送到远程
     7）git push origin :refs/tags/tag_name #删除远程的tag_name标签
+
+14.管理远程仓促
+参考：https://docs.github.com/cn/get-started/getting-started-with-git/managing-remote-repositories
+1）添加远程仓库
+    git remote add 命令使用两个参数
+    远程命令:   origin
+    远程url:   https://github.com/BigPandaCPU/LearnProject.git 或者 git@github.com:BigPandaCPU/LearnProject.git
+    （注意这里的http和ssh的区别）
+2）更改远程仓库的URL
+
+    查看远程仓库的url
+    git remote -v
+
+    git remote set-url 命令
+    更新为使用https
+    git remote set-url https://github.com/BigPandaCPU/LearnProject.git
+    更新为ssh
+    git remote set-url git@github.com:BigPandaCPU/LearnProject.git
+3)重命名远程仓库
+    使用git remote rename 命令
+    git remote rename origin destination
+    #origin为现有的远程名称，destination为远程的新名称
+    git remote -v #查看远程仓促
+    origin  git@github.com:BigPandaCPU/GitLearn.git (fetch)
+    origin  git@github.com:BigPandaCPU/GitLearn.git (push)
+    #这的origin表示远程仓库名
+15
+    git fecth
+
+16撤销修改
+1）撤销工作区修改
+    git checkout -- . #撤销工作区的所有修改，工作区的修改。此时已经修改，但是还没有add
+    git checkout -- 文件名  #撤销工作区，指定的文件的修改
+2）撤销暂存区的修改（Staging area）
+    git reset -- .  #此时将add的操作，撤销，但工作区的修改并不会撤销。
+    git reset -- 文件名   #撤销暂存区的修改，指定文件的修改
+3）本地仓库
+    git commit --amend -m "新的log信息"  #修订最后一次提交的commit message
+    git rest --hard HEAD~1              #本地版本回退，若此版本没有push到远端，则回退后，log tree上会删除当前版本的提交记录
+4)远程仓库
+    假设此次push操作，发现了有错误，需要将此次push撤回，该怎么操作
+    A.git reset --hard HEAD~1  #在本地回退到上一版本
+    B.git add .  #添加到缓存
+    C.git commit -m "huitui" #此时，此命令会报错，得改用强制回退
+    D.git push origin master --force #强制回退，此时远端仓库回退了
