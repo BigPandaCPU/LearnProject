@@ -1,0 +1,25 @@
+1.std::remove_if()，可以理解为通过双指针来实现对目标元素的移位
+template <class ForwardIterator, class UnaryPredicate>
+  ForwardIterator remove_if (ForwardIterator first, ForwardIterator last,
+                             UnaryPredicate pred)
+{
+  ForwardIterator result = first;
+  while (first!=last)
+  {
+    if (!pred(*first))
+	{
+      if (result!=first)
+	  {
+        *result = std::move(*first);
+	  }
+      ++result;
+    }
+    ++first;
+  }
+  return result;
+}
+
+demo
+
+
+template <typename Val>

@@ -485,6 +485,39 @@ XYZ VertexInterp(double isolevel, XYZ p1, XYZ p2, double valp1, double valp2)
 	return (p);
 }
 
+void CalculateNormals(std::vector<TRIANGLE> &tri) 
+{
+	for (size_t i = 0; i < tri.size(); i++)
+	{
+		XYZ p0, p1, p2, vec1, vec2, face_normal;
+		p0 = tri[i].p[0];
+		p1 = tri[i].p[1];
+		p2 = tri[i].p[2];
+
+		vec1.x = p1.x - p0.x;
+		vec1.y = p1.y - p0.y;
+		vec1.z = p1.z - p0.z;
+
+		vec2.x = p2.x - p1.x;
+		vec2.y = p2.y - p1.y;
+		vec2.z = p2.z - p1.z;
+
+		face_normal.x = vec1.z*vec2.y - vec1.y*vec2.z;
+		face_normal.y = vec1.x*vec2.z - vec1.z*vec2.x;
+		face_normal.z = vec1.y*vec2.x - vec1.x*vec2.y;
+		float len = sqrt(face_normal.x*face_normal.x + face_normal.y*face_normal.y + face_normal.z*face_normal.z);
+		if (len > 0.00001)
+		{
+			face_normal.x /= len;
+			face_normal.y /= len;
+			face_normal.z /= len;
+		}
+
+		tri[i].fcaeNormal = face_normal;
+	}
+}
+
+
 bool ExportFileSTLBinary(std::string filePath, const std::string & headerInfo, const std::vector<TRIANGLE>& tri, const int& triangleCount)
 {
 	std::ofstream fileOut(filePath, std::ios::binary);
@@ -538,7 +571,7 @@ bool ExportFileSTLBinary(std::string filePath, const std::string & headerInfo, c
 		XYZ p1 = tri[i].p[1];
 		XYZ p2 = tri[i].p[2];
 		
-		XYZ triNormal = {0.5, 0.5 , 0.5};
+		XYZ triNormal = tri[i].fcaeNormal;
 
 		//a facet normal
 		REINTERPRET_WRITE(triNormal.x);

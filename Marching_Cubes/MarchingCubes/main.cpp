@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 	ExportFileSTLBinary(saveFilePath, headerInfo, tri, ntri);
 
 
-	/*fprintf(stderr, "Writing triangles ...\n");
+	fprintf(stderr, "Writing triangles ...\n");
 	if ((fptr = fopen("./data/output.geom", "w")) == NULL)
 	{
 		fprintf(stderr, "Failed to open output file\n");
@@ -154,14 +154,14 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < ntri; i++)
 	{
-		fprintf(fptr, "f3 ");
+		//fprintf(fptr, "f3 ");
 		for (k = 0; k < 3; k++)
 		{
-			fprintf(fptr, "%g %g %g ", tri[i].p[k].x, tri[i].p[k].y, tri[i].p[k].z);
+			fprintf(fptr, "%g %g %g %g %g %g\n", tri[i].p[k].x, tri[i].p[k].y, tri[i].p[k].z, tri[i].fcaeNormal.x, tri[i].fcaeNormal.y, tri[i].fcaeNormal.z);
 		}
-		fprintf(fptr, "0.5 0.5 0.5\n");
+		//fprintf(fptr, "0.5 0.5 0.5\n");
 	}
-	fclose(fptr);*/
+	fclose(fptr);
 	system("pause");
 	exit(0);
 }

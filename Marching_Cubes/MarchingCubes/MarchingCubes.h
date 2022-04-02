@@ -17,7 +17,8 @@ typedef struct
 {
 	XYZ p[3];     /*Vertices*/
 	XYZ c;        /*Centroid*/
-	XYZ n[3];     /*Normal*/
+	XYZ n[3];     /*Point Normal*/
+	XYZ fcaeNormal; /*Cell Normal*/
 
 }TRIANGLE;
 
@@ -27,3 +28,4 @@ int PolygoniseCube(GRIDCELL, double, TRIANGLE*);
 XYZ VertexInterp(double, XYZ, XYZ, double, double);
 
 bool ExportFileSTLBinary(std::string filePath, const std::string & headerInfo, const std::vector<TRIANGLE> &tri, const int& triangleCount);
+void CalculateNormals(std::vector<TRIANGLE> &tri);
