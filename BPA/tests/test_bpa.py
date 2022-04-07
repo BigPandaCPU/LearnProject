@@ -20,11 +20,11 @@ class TestBPA(unittest.TestCase):
     #     bpa.create_mesh(limit_iterations=1000)
     #     bpa.visualizer.lock()
     #
-    # def test_small_bunny(self):
-    #     # Load data.
-    #     bpa = BPA(path='bunny_with_normals.txt', radius=0.0005, visualizer=True)
-    #     bpa.create_mesh(limit_iterations=900)
-    #     bpa.visualizer.lock()
+    def test_small_bunny(self):
+        # Load data.
+        bpa = BPA(path='bunny_with_normals.txt', radius=0.0005, visualizer=True)
+        bpa.create_mesh(limit_iterations=900)
+        bpa.visualizer.lock()
     #
     # def test_tea(self):
     #     # Load data.

@@ -1,0 +1,108 @@
+Docker常用命令解析
+参考：
+https://www.cnblogs.com/dwlovelife/p/11520221.html
+https://zhuanlan.zhihu.com/p/23599229
+
+一、镜像命令
+1.查看自己服务器中docker镜像列表
+docker images
+docker images -a  #列出本地所有的镜像（含中间镜像层）
+docker images -q  #只显示镜像ID
+
+
+2.搜索镜像
+docker serach 镜像名
+docker serach --filter=STARS=9000 mysql #搜索STARS > 9000的mysql镜像
+docker search -s 10 tomcat #列出搜藏数不小于10的tomcat镜像
+
+3.拉取镜像
+docker pull 镜像名
+docker pull 镜像名:tag
+
+4.删除镜像
+docker rmi -f 镜像ID  #删除单个镜像
+docker rmi -f 镜像名1:TAG 镜像名2:Tag  #删除多个镜像
+docker rmi -f $(docker images -qa)  #删除全部镜像
+
+5.镜像的其他操作
+docker save -o demo.tar demo:v1 #保存镜像，-o 或 --output
+docker load -i demo.tar #加载镜像，-i也可以是--input
+
+
+二、容器命令
+1.新建并启动容器
+docker run [option] image [command]
+docker run -it centos /bin/bash
+
+解释：使用镜像centos:latest以交互模式启动一个容器，在容器内执行/bin/bash命令
+option参数
+--name="容器新名字"
+-d:后台运行容器，并返回容器ID,也即启动守护式容器；
+-i:以交互模式运行容器
+-t:为容器重新分配一个伪输入端
+-P:随机端口映射
+-p:指定端口映射
+-v：
+
+#启动容器时，将宿主机目录挂载到容器里
+docker run -it --name=bp_demo -v D:/project/PyProject/docker_demo/logs:/docker_demo/logs demo:v1  bash
+#解释：根据镜像demo:v1，创建一个名为bp_demo的容器，并且将本地的目录D:/project/PyProject/docker_demo/logs挂载到容器
+#中的目录/docker_demo/logs，这样在容器中操作logs文件夹下的，就相当于在本地操作。
+
+2.列出当前所有正在运行的容器
+docker ps
+
+-a:列出当前所有正在运行的容器+历史上运行过的
+-q:静默模式，只显示容器编号
+--no-trunc:不截断输出
+
+3.退出容器，两种退出方式
+exit 容器停止退出
+ctrl+p+q 容器不停止退出
+
+4.容器启停命令
+docker start 容器ID或者容器名  #启动容器
+docker restart 容器ID或者容器名 #重启容器
+docker stop 容器ID或者容器名 #停止容器
+docker kill 容器ID或者容器名 #强制停止容器
+
+5.删除已停止的容器
+docker rm 容器ID #删除单个容器
+docker rm -f $(docker ps -a -q) #删除多个容器
+
+
+三、Dockerfile文件编写
+
+1.Dockerfile文件脚本编写
+#demo1
+FROM python:3.7  #说明该镜像以那个为基础
+MAINTAINER bigpanda #维护者信息
+WORKDIR /docker_demo  #指定镜像所在的目录 如（/docker_demo,/home/docker_demo)
+ADD . .  #ADD <源路径> <目标路径>，第一个参数“.”代表Dockerfile所在的目录，即python项目dockerdemo
+         #下所有的目录（不包括docker_demo自身）。第二个参数“.”代表镜像的工作目录docker_demo。
+         #将Dockerfile所在目录下的所有文件，拷贝到镜像工作目录中。
+RUN pip install -r requirements.txt   #执行命令行命令的
+#CMD ["python", "./src/main.py"]  #容器启动后执行的命令
+
+2.镜像生成
+docker build -t bigpandacpu/demo:v1 .   #生成镜像的时候，要求是  用户名/具体镜像名
+
+3.镜像生成的另一种方式
+利用镜像启动一个容器后进行修改 ==> 利用commit提交更新后的副本
+#demo
+docker run -it centos:latest /bin/bash
+yum install git
+docker commit -m "centos with git" -a "bigpandacpu" 72f1a8a0e394 bigpandacpu/centos:git
+# -m指定说明信息；-a指定用户信息; 72f1a8a0e394代表容器的id;
+# bigpandacpu/centos:git指定目标镜像的用户名、仓库名和 tag 信息。注意这里的用户名bigpandacpu，后边push
+# 的时候会用到
+
+
+四、仓库的基本操作
+将自己自定义的镜像发布（push）到DockerHub上
+1.登录
+docker login
+#按照提示输入用户名和密码
+
+2.推送指定的镜像
+docker push bigpandacpu/demo:v1   # 镜像名的前面必须与hub.docker的账户名保持一致
