@@ -28,6 +28,7 @@ nothing to commit, working tree clean
 
 4.版本回退
 git add . 操作之后，想撤销， git reset HEAD
+git reset HEAD tmp.py #将add的文件，tmp.py撤回
 
 git reset --hard HEAD~2 当前版本基础上回退两个
 

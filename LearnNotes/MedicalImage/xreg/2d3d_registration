@@ -1,0 +1,17 @@
+xreg工具包介绍：
+链接：https://github.com/rg2/xreg/wiki/Walkthrough%3A-Single-View-Pelvis-Registration
+
+1.xreg-hip-surg-pelvis-single-view-regi-2d-3d
+2d到
+
+2. xreg-proj-data-extract-nii.exe 将h5中的数据，转换为nii.gz格式
+    demo：
+    xreg-proj-data-extract-nii.exe -v example1_1_pd_003.h5 example1_1_pd_003_proj 0
+    #将h5文件中的index为0的数据转换成nii.gz格式
+
+3.xreg-add-lands-to-proj-data.exe   将landmarks添加到h5文件中
+    demo:
+    xreg-add-lands-to-proj-data -v example1_1_pd_003.h5 example1_1_pd_003_proj_0_lands.fcsv
+    #将fcsv中的坐标添加到h5文件中
+
+4.xreg-remap-tile-proj-data   将\h5
