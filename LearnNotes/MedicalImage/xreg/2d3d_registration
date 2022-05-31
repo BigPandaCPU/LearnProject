@@ -1,17 +1,236 @@
+xreg工具包介绍大纲：
+1.获取此工具包
+
+2.术前规划
+    (1).DICOM数据转换和从采样
+    (2).体数据裁剪（Volume crop）
+    (3).骨骼分割（Bone segmentation）
+    (4).网格数据创建
+    (5).髋臼周围截骨术的建模和规划
+
+3.模拟数据
+    (1).髋臼周围截骨术碎片调整的随机模拟
+    (2).髋臼周围截骨术的体积建模和股骨姿态
+    (3).螺钉和克氏针的插入和体积建模
+    (4).荧光图像
+
+4.术中3D/3D配准
+    (1).点云和表面的配准
+
+5.术中2D/3D（荧光透视/CT）配准
+    (1).单视图的骨盆配准
+    (2).多视图的骨盆、股骨、髋骨配准
+
+6.数据大纲
+
+
+
 xreg工具包介绍：
 链接：https://github.com/rg2/xreg/wiki/Walkthrough%3A-Single-View-Pelvis-Registration
 
-1.xreg-hip-surg-pelvis-single-view-regi-2d-3d
-2d到
+1.工具获取
+    windows用户下载链接
+    https://github.com/rg2/xreg/releases
+    可以下载源代码自己编译，也可以下载已经编译好的工具包
 
-2. xreg-proj-data-extract-nii.exe 将h5中的数据，转换为nii.gz格式
-    demo：
-    xreg-proj-data-extract-nii.exe -v example1_1_pd_003.h5 example1_1_pd_003_proj 0
-    #将h5文件中的index为0的数据转换成nii.gz格式
+2.术前规划
+    (1).DICOM数据转换和重采样
+       a.   xreg-convert-dicom-vols DICOM_DIR  out_name.nii.gz --one
+            #DICOM_DIR只有一个DICOM数据，将其转换为nii.gz格式
 
-3.xreg-add-lands-to-proj-data.exe   将landmarks添加到h5文件中
-    demo:
-    xreg-add-lands-to-proj-data -v example1_1_pd_003.h5 example1_1_pd_003_proj_0_lands.fcsv
-    #将fcsv中的坐标添加到h5文件中
+       b.   xreg-convert-dicom-vols DICOM_DIR head.nii.gz --one --ss 1
+            #将DICOM_DIR文件夹下的dicom数据，slice spacing重采样到间距为1mm,并保存为nii.gz格式
 
-4.xreg-remap-tile-proj-data   将\h5
+       c.   xreg-convert-dicom-vols example3 example3_resampled --iso 1
+            #examles3文件夹里包含多个dicom文件，对每一个进行重采样，slice_spacing设置为1mm
+            #重采样后的文件保存在example3_resampled文件夹里，文件名为每个dicom数据的PID.nii.gz
+
+
+    (2).体数据裁剪（Volume crop）
+       a.   xreg-crop-vol lymph.nii.gz R.acsv pelvis.nii.gz
+            #根据R.acsv文件中的参数对lymph.nii.gz数据进行裁剪，保存为pelvis.nii.gz格式
+
+    (3).骨骼分割（Bone segmentation）
+       a.   SegmentBoneFromCT pelvis.nii.gz tmp pelvis_seg.nii.gz
+            #对pelvis.nii.gz进行骨骼分割，将中间文件保存在tmp文件夹下，输出结果保存在pelvis_seg.nii.gz
+
+    (4).网格数据创建
+       a.   xreg-create-mesh -i --lower 150 pelvis.nii.gz pelvis_thresh_sur.ply
+            #对pelvis.nii.gz首先进行阈值分割，小于150的为0，大于150的为1，将分割后的进行三维提数据重建，生成ply文件
+
+       b.   xreg-show-mesh pelvis_sur.ply
+            #提数据重绘
+
+    (5).髋臼周围截骨术的建模和规划
+       a.   xreg-pao-create-frag pelvis_seg.nii.gz pelvis_app_lands.fcsv pao_cut_lands.fcsv left - pao_cuts_seg.nii.gz pao_cut_defs.h5
+            #截取髋臼周围的左侧数据。从pelvis_seg.nii.gz中截取左侧的的数据，最后保存为pao_cut_defs.h5 文件
+
+       b.   xreg-pao-draw-bones pao_cuts_seg.nii.gz pelvis_app_lands.fcsv left --cut-defs pao_cut_defs.h5
+            #对截取的进行三维显示
+
+3.模拟数据
+    (1).髋臼周围截骨术碎片调整的随机模拟
+       a.   xreg-pao-sample-frag-moves -v pao_cuts_seg.nii.gz pelvis_app_lands.fcsv left 10 test_pao --frag-rot-mean-x 10 --frag-rot-std-x 10 --frag-rot-mean-y 3 --frag-rot-std-y 3 --frag-rot-mean-z 12.5 --frag-rot-std-z 12.5 --trans-mean-x 2.5 --trans-std-x 5 --trans-mean-y -2 --trans-std-y 2 --trans-mean-z 2 --trans-std-z 3 --femur-rot-mean-x 10 --femur-rot-std-x 10 --femur-rot-mean-y 0 --femur-rot-std-y 5 --femur-rot-mean-z 0 --femur-rot-std-z 2 --morph-open-size 5 --uniform-sampling
+            #sample 10 random movements of the left PAO fragment and femur:
+            生成10个随机的movements
+
+       b.   xreg-pao-draw-bones pao_cuts_seg.nii.gz pelvis_app_lands.fcsv left --femur-frag-xform test_pao_frag_0.h5 --femur-only-xform test_pao_femur_0.h5
+            #选取其中的一块进行显示
+
+    (2).髋臼周围截骨术的体积建模和股骨姿态
+       a.   xreg-pao-create-repo-vol pelvis.nii.gz pao_cuts_seg.nii.gz pelvis_app_lands.fcsv left test_pao_frag_0.h5 test_pao_femur_0.h5 pao_vol.nii.gz
+            #模拟将截骨分离后的样子
+
+    (3).螺钉和克氏针的插入和体积建模
+       a.   xreg-pao-add-screw-kwires-to-vol
+                    -v --super-sample 2
+                    pao_vol.nii.gz
+                    pao_cuts_seg.nii.gz
+                    pelvis_app_lands.fcsv
+                    left
+                    test_pao_frag_0.h5
+                    pelvis_left_insertion_labels.nii.gz
+                    pao_vol_with_kwire.nii.gz
+                    --p-two 1
+                    --p-wire 1
+            #模拟插入克氏针的情况
+
+       b.   xreg-pao-add-screw-kwires-to-vol
+                    -v --super-sample 2
+                    pao_vol.nii.gz
+                    pao_cuts_seg.nii.gz
+                    pelvis_app_lands.fcsv
+                    left
+                    test_pao_frag_0.h5
+                    pelvis_left_insertion_labels.nii.gz
+                    pao_vol_with_screws.nii.gz
+                    --p-two 0
+                    --p-wire 0
+            #模拟插入螺丝钉的情况
+
+    (4).荧光图像
+       a.   xreg-pao-create-synth-fluoro
+                    -v pao_vol_with_kwire.nii.gz
+                    pelvis_app_lands.fcsv
+                    left 5 example1_1_pd example1_1_pose
+            #使用默认参数创建五个三视图集合
+
+       b.   xreg-draw-xray-scene example1_1_pd_003.h5
+            #克氏针插入的几何形状显示
+
+       c.   xreg-draw-xray-scene -i example1_1_pd_003.h5
+            #增加底图显示
+
+       d.   .....
+
+4.术中3D/3D配准
+    (1).点云和表面的配准
+       a.   在3DSlicer中打开pelvis数据，然后进行渲染，在盆骨上模拟探针点一些点，然后将这些点通过regid tranform变换
+       b.   进行point cloud和surface的配准
+            xreg-sur-regi
+                    pelvis_sur.ply
+                    pelvis_intraop_point_cloud.fcsv
+                    pelvis_regi.h5 --mesh-lands
+                    pelvis_preop_lands.fcsv
+                    --pts-lands pelvis_intraop_lands.fcsv
+            #ply是模型文件,pelvis_intraop_point_cloud.fcsv是待配准的点云文件 pelvis_regi.h5是配准后的结果文件
+
+       c.   xreg-xform-fcsv
+                    pelvis_intraop_point_cloud.fcsv
+                    pelvis_regi.h5
+                    pelvis_intraop_point_cloud_regi.fcsv
+            #变换矩阵对点云进行变换，得到变换后的点云
+
+5.术中2D/3D（荧光透视/CT）配准
+
+    (1).单视图的骨盆配准
+       a.   xreg-hip-surg-pelvis-single-view-regi-2d-3d 该工具首先使用先前在 3D 和 2D 视图中识别的解剖标志计算配对点配准。
+            然后使用由配对点方法产生的姿势作为初始估计来执行基于多分辨率的配准。 最终的姿态估计被写入磁盘。
+
+       b.   xreg-proj-data-extract-nii.exe
+                    -v example1_1_pd_003.h5
+                    example1_1_pd_003_proj 0
+            #将二维投影的数据h5格式转换为nii.gz格式(二维投影数据包含特征标记点数据)
+
+       c.   xreg-add-lands-to-proj-data
+                    -v example1_1_pd_003.h5
+                    example1_1_pd_003_proj_0_lands.fcsv
+            #将标记数据添加到投影数据中
+
+       d.   xreg-remap-tile-proj-data
+                    example1_1_pd_003.h5
+                    -o -p 0 -d 0.25
+                    example1_1_pd_003_proj_0_w_lands.png
+            #将二维投影数据中的特征点显示出来，并保存为png图片
+
+       e.   xreg-hip-surg-pelvis-single-view-regi-2d-3d
+                            pelvis.nii.gz
+                            pelvis_regi_2d_3d_lands.fcsv
+                            example1_1_pd_003.h5
+                            regi_pose_example1_1_pd_003_proj0.h5
+                            regi_debug_example1_1_pd_003_proj0_w_seg.h5
+                            -s pelvis_seg.nii.gz
+            #此命令使用 -s 标志传递 3D 骨盆分割并从输入体积中屏蔽非骨盆结构，例如股骨、软组织、椎骨和空气。
+             估计的骨盆位姿保存在 regi_pose_example1_1_pd_003_proj0.h5 中，一些调试信息将写入
+             regi_debug_example1_1_pd_003_proj0_w_seg.h5。 如果未提供输出调试信息文件的路径，
+             则不会将调试信息写入磁盘。
+
+            #使用配准姿态估计，场景可视化工具 xreg-draw-xray-scene 可用于相对于投影坐标系渲染骨盆：
+
+       f.   xreg-draw-xray-scene
+                        example1_1_pd_003.h5
+                        -p 0 pelvis_sur.ply
+                        regi_pose_example1_1_pd_003_proj0.h5
+                        -i --bg-color 1 1 1
+                        --mesh-color-bone
+            #场景可视化工具对配准坐标系进行显示
+
+       g.   xreg-regi2d3d-replay
+                    regi_debug_example1_1_pd_003_proj0_w_seg.h5
+                    --video-fps 10
+                    --proj-ds 0.5
+            #video-fps 标志表示输出视频所需的帧速率 (10)，
+             proj-ds 标志表示输出视频的 2D 维度应被下采样为投影数据原始维度的一半。
+
+            #配准注册重播工具使用调试信息，可用于创建注册处理的视频可视化
+            #此命令将会产生两个输出文件 edges.mp4和 mov.mp4
+            #(edges.mp4) 将保持荧光检查在背景中固定，同时覆盖与骨盆当前姿势估计相对应的绿色轮廓。
+             当骨盆正确配准时，这些轮廓应与透视特征很好地对齐。 mov.mp4 视频的每一帧都显示一个模
+             拟投影，对应于骨盆的当前姿势估计。 每个视频底部的文本在括号中指示分辨率级别以及处理期
+             间使用的下采样因子、当前配准方法的名称以及当前配准方法的迭代次数。
+
+
+    (2).多视图的骨盆、股骨、髋骨配准
+       a.  xreg-pao-frag-mult-view-regi-2d-3d
+                    -v pelvis.nii.gz
+                    pao_cuts_seg.nii.gz
+                    left
+                    pelvis_app_lands.fcsv
+                    pelvis_regi_2d_3d_lands.fcsv
+                    example1_1_pd_003.h5
+                    regi_pose_pelvis.h5
+                    regi_pose_femur.h5
+                    regi_pose_frag.h5
+                    rel_pose_femur.h5
+                    rel_pose_frag.h5
+                    multi_obj_multi_view_debug.h5
+
+       b.   xreg-regi2d3d-replay
+                    --video-fps 10
+                    --proj-ds 0.5
+                    multi_obj_multi_view_debug.h5
+
+       c.   xreg-pao-draw-bones
+                    pao_cuts_seg.nii.gz
+                    pelvis_app_lands.fcsv
+                    left
+                    --femur-frag-xform
+                    rel_pose_frag.h5
+                    --femur-only-xform
+                    rel_pose_femur.h5
+                    --femur-not-rel-to-frag
+                    multiple_view_regi_bones_viz_AP.png
+                    --cam-view ap
+                    --bg-color 1 1 1
+       #以上命令将使用 PAO 骨骼可视化工具 xreg-pao-draw-bones，使用从配准中恢复的相对姿势
+        创建骨盆、股骨和片段的 AP 和横向可视化
