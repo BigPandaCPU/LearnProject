@@ -3,6 +3,13 @@
 # This simple example shows how to do basic rendering and pipeline
 # creation.
 
+# 了解vtk render中如何增加axes actor
+
+# 了解vtk中的actor旋转参数，坐标轴不变，物体的位置发生变化
+#     cylinderActor.RotateX(45.0)  绕x轴旋转
+#     cylinderActor.RotateY(0.0)   绕y轴旋转
+#     cylinderActor.RotateZ(0.0)   绕z轴旋转
+
 # noinspection PyUnresolvedReferences
 import vtkmodules.vtkInteractionStyle
 # noinspection PyUnresolvedReferences
@@ -43,7 +50,7 @@ def main():
     cylinderActor = vtkActor()
     cylinderActor.SetMapper(cylinderMapper)
     cylinderActor.GetProperty().SetColor(colors.GetColor3d("Tomato"))
-    cylinderActor.RotateX(0.0)
+    cylinderActor.RotateX(45.0)
     cylinderActor.RotateY(0.0)
     cylinderActor.RotateZ(0.0)
 
