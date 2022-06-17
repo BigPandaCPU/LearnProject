@@ -7,16 +7,16 @@ BUILD_TESTING: 该选项会编译生成相应的exe文件进行，用于测试
 Module_TwoProjectionRegistration:该选项会从github上下载该仓库，然后进行编译
 
 编译勾选项1
-![Example](img译ITK勾选项1.png)
+![Example](./img/编译ITK勾选项1.png)
 
 编译勾选项2
-![Example](img译ITK勾选项2.png)
+![Example](./img/编译ITK勾选项2.png)
 
 ##
 2.在cmake下编译完后，然后打开sln，找到TwoProjectionRegistrationTestDriver这个工程
 
 生成的工程文件
-![Example](img.png)
+![Example](./img/3.png)
 
 ##
 3.命令行调用
