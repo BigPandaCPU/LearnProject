@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# 了解vtk render中如何增加axes actor
+
+
 # noinspection PyUnresolvedReferences
 import vtkmodules.vtkInteractionStyle
 # noinspection PyUnresolvedReferences

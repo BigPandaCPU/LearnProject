@@ -62,6 +62,9 @@ def main():
     # nature of the events.
     ren = vtkRenderer()
     renWin = vtkRenderWindow()
+    # print("1")
+    # renWin.SetOffScreenRendering(1)
+    # print("2")
     renWin.AddRenderer(ren)
     iren = vtkRenderWindowInteractor()
     iren.SetRenderWindow(renWin)

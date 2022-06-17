@@ -1,5 +1,6 @@
 import itk
 import vtk
+import numpy as np
 
 def augment_matrix_coord(array):
     n = len(array)
@@ -17,7 +18,7 @@ def StlReader(StlModelFileName, import_mode = 'vtk'):
         readerSTL.SetFileName(StlModelFileName)
         readerSTL.Update()
 
-        polydata = readerSTL.GetOuput()
+        polydata = readerSTL.GetOutput()
 
         # If there are no points in ''vtkPolyData' something went wrong
         if polydata.GetNumberOfPoints() == 0:
@@ -26,166 +27,183 @@ def StlReader(StlModelFileName, import_mode = 'vtk'):
 
         return polydata
 
-class Mahfouz():
-    """Binary DRR generation from STL model.
-        this class renders a binary image using VTK and smooths it with
-        Gaussian filter using OpenCV:
 
-        Methods:
-            _new_rendoer(function):sets up a new rendoer for a new DRR
-            compute(function):returns a 2D image(DRR) as a numpy array.
-            delete(function):eventually deletes the projector obejct(only
-            needed to deallocate memory from GPU)
-
-        Note:the camera coordinate system has the y axis pointing downwards
-
-    """
-    def __init__(self, projector_info,
+def MahfouzProjector(projector_info,
                     StlModelFileName,
                     PixelType,
-                    Dimension,
-                    ScalarType,
                     correction_matrix = []):
-        """Prepares itk stuff, loads stl and initializes VTK render.
+    # ITK: Instantiate types
+    Dimension = 2
+    ImageType2D = itk.Image[PixelType, 2]
+    RegionType = itk.ImageRegion[Dimension]
+    moveImageInfo = {'Volume_center': (0.0, 0.0)}
+    correction_matrix = correction_matrix
 
-            Args:
-                projector_info(dict ot str):with the following keys:
-                - Name:'Mahfouz'
-                - near (float):near clipping plane(vtk)
-                - far (float):far clipping plane(vtk)
-                - intGSigma (int):sigma of the Haussian filter
-                - intGSize (int):size of the Gaussian kernal
-                - 3Dmodel (str): name of 3D model (ie. stem)
-        """
+    # ITK: Set DRR image at initial position(at +focal length along the z direction)
+    DRR = ImageType2D.New()
+    DRRregion = RegionType()
+    moveDirection = DRR.GetDirection()
 
-        #ITK: Instantiate types
-        self.Dimension = 2
-        self.ImageType2D = itk.Image[PixelType, 2]
-        self.RegionType = itk.ImageRegion[self.Dimension]
-        moveImageInfo = {'Volume_center':(0.0, 0.0)}
-        self.correction_matrix = correction_matrix
+    DRRstart = itk.Index[Dimension]()
+    DRRstart.Fill(0)
 
-        #ITK: Set DRR image at initial position(at +focal length along the z direction)
-        DRR = self.ImageType2D.New()
-        self.DRRregion = self.RegionType()
-        self.moveDirection = DRR.GetDirection()
+    DRRsize = [0] * Dimension
+    DRRsize[0] = projector_info['DRRsize_x']
+    DRRsize[1] = projector_info['DRRsize_y']
 
-        DRRstart = itk.Index[self.Dimension]()
-        DRRstart.Fill(0)
+    DRRregion.SetSize(DRRsize)
+    DRRregion.SetIndex(DRRstart)
 
-        self.DRRsize = [0]*self.Dimension
-        self.DRRsize[0] = projector_info['DRRsize_x']
-        self.DRRsize[1] = projector_info['DRRsize_y']
+    DRRspacing = itk.Point[itk.F, Dimension]()
+    DRRspacing[0] = projector_info['DRRspacing_x']
+    DRRspacing[1] = projector_info['DRRspacing_y']
 
-        self.DRRregion.SetSize(self.DRRsize)
-        self.DRRregion.SetIndex(DRRstart)
+    DRRorigin = itk.Point[itk.F, Dimension]()
+    DRRorigin[0] = moveImageInfo['Volume_center'][0] - projector_info['DRR_ppx'] - DRRspacing[0] * (
+                DRRsize[0] - 1.) / 2.0
+    DRRorigin[1] = moveImageInfo['Volume_center'][1] - projector_info['DRR_ppy'] - DRRspacing[1] * (
+                DRRsize[1] - 1.) / 2.0
 
-        self.DRRspacing = itk.Point[itk.F, self.Dimension]
-        self.DRRspacing[0] = projector_info['DRRspacing_x']
-        self.DRRspacing[1] = projector_info['DRRspacing_y']
+    DRR.SetRegions(DRRregion)
+    DRR.Allocate()
+    DRR.SetSpacing(DRRspacing)
+    DRR.SetOrigin(DRRorigin)
+    moveDirection.SetIdentity()
+    DRR.SetDirection(moveDirection)
 
-        self.DRRorigin = itk.Point[itk.F, self.Dimension]
-        self.DRRorigin[0] = moveImageInfo['Volume_center'][0] - projector_info['DRR_ppx'] - self.DRRspacing[0]*(self.DRRsize[0] - 1.) / 2.0
-        self.DRRorigin[1] = moveImageInfo['Volume_center'][1] - projector_info['DRR_ppy'] - self.DRRspacing[1]*(self.DRRsize[1] - 1.) / 2.0
+    # Load stl mesh (with vtk function)
+    StlMesh = StlReader(StlModelFileName)
 
-        DRR.SetRegion(self.DRRregion)
-        DRR.Allocate()
-        DRR.SetSpacing(self.DRRspacing)
-        DRR.SetOrigin(self.DRRorigin)
-        self.moveDirection.SetIdentity()
-        DRR.SetDirection(self.moveDirection)
+    # the correction matrix allows to make the local CS of the object coincidde with the standard camera CS
+    # if correction_matrix:
+    #     StlPoints = np.dot(correction_matrix, augment_matrix_coord(StlPoints))[0:3].T
 
-        # Load stl mesh (with vtk function)
-        self.StlMesh = StlReader(StlModelFileName)
+    # Set Camera parameters (conver from mm to pixel units)
+    ppx_pixels = projector_info['DRR_ppx'] / DRRspacing[0]
+    ppy_pixels = projector_info['DRR_ppy'] / DRRspacing[1]
+    focal_length_pixels = projector_info['focal_lenght'] / DRRspacing[0]
+    near = projector_info['near']
+    far = projector_info['far']
 
-        #the correction matrix allows to make the local CS of the object coincidde with the standard camera CS
-        if self.correction_matrix:
-            self.StlPoints = np.dot(correction_matrix, augment_matrix_coord(StlPoints))[0:3].T
+    # Prepare Gaussian filters for intensity image
+    IntGaussSigma = projector_info['intGsigma']
+    IntGaussSize = projector_info['intGsize']
 
-        #Set Camera parameters (conver from mm to pixel units)
-        self.ppx_pixels = projector_info['DRR_ppx']/self.DRRspacing[0]
-        self.ppy_pixels = projector_info['DRR_ppy']/self.DRRspacing[1]
-        self.focal_length_pixels = projector_info['focal_lenght']/self.DRRspacing[0]
-        self.near = projector_info['near']
-        self.far = projector_info['far']
+    # VTK:Initialize first rendering
+    # Mapper
+    init_mapper = vtk.vtkPolyDataMapper()
+    init_mapper.SetInputData(StlMesh)
 
+    # Actor for binary image
+    actor = vtk.vtkActor()
+    actor.SetMapper(init_mapper)
+    actor.GetProperty().SetColor(0.0, 0.0, 0.0)
+    actor.GetProperty().SetAmbient(1)
+    actor.GetProperty().SetDiffuse(0)
 
-        #Prepare Gaussian filters for intensity image
-        self.IntGaussSigma = projector_info['intGsigma']
-        self.IntGaussSize = projector_info['intGsize']
+    axes = vtk.vtkAxesActor()
 
-        #VTK:Initialize first rendering
-        #Mapper
-        init_mapper = vtk.vtkPolyDataMapper()
-        init_mapper.SetInputData(self.StlMesh)
+    # Renderer for binary image
+    MahfouzRenderer = vtk.vtkRenderer()
+    MahfouzRenderer.AddActor(actor)
+    MahfouzRenderer.SetBackground(1, 1, 1)
 
-        #Actor for binary image
-        self.actor = vtk.vtkActor()
-        self.actor.SetMapper(init_mapper)
-        self.actor.GetProperty().SetColor(0.0, 0.0, 0.0)
-        self.actor.GetProperty().SetAmbient(1)
-        self.actor.GetProperty().SetDiffuse(0)
+    MahfouzRenderer.AddActor(axes)
 
-        # Renderer for binary image
-        self.MahfouzRenderer = vtk.vtkRenderer()
-        self.MahfouzRenderer.AddActor(self.actor)
-        self.MahfouzRenderer.SetBackground(1, 1, 1)
+    # Renderer window
+    MahfouzRenderWindow = vtk.vtkRenderWindow()
+    MahfouzRenderWindow.AddRenderer(MahfouzRenderer)
+    ##MahfouzRenderWindow.SetOffScreenRendering(1)  # it prevents generating a window
+    MahfouzRenderWindow.SetSize(DRRsize[0], DRRsize[1])
+    #MahfouzRenderWindow.Render()
 
-        #Renderer window
-        self.MahfouzRenderWindow = vtk.vtkRenderWindow()
-        self.MahfouzRenderWindow.AddRenderer(self.MahfouzRenderer)
-        self.MahfouzRenderWindow.SetOffScreenRendering(1) #it prevents generating a window
-        self.MahfouzRenderWindow.SetSize(self.DRRsize[0], self.DRRsize[1])
-        self.MahfouzRenderWindow.Render()
+    # Camera parameters
+    Camera = MahfouzRenderer.GetActiveCamera()
+    Camera.SetClippingRange(near, far)
+    Camera.SetPosition(0, 0, 0)
+    Camera.SetFocalPoint(0, 0, -1)
+    Camera.SetViewUp(0, 1, 0)
 
-        #Camera parameters
-        self.Camera = self.MahfouzRenderer.GetActiveCamera()
-        self.Camera.SetClippingRange(self.near, self.far)
-        self.Camera.SetPosition(0, 0, 0)
-        self.Camera.SetFocalPoint(0, 0,-1)
-        self.Camera.SetViewUp(0, 1, 0)
+    # Set window center for offset principal point
+    # if principal point is referred to principal ray
+    wcx = -2.0 * (ppx_pixels) / DRRsize[0]
+    wcy = -2.0 * (ppy_pixels) / DRRsize[1]
 
-        #Set window center for offset principal point
-        # if principal point is referred to principal ray
-        wcx = -2.0*(self.ppx_pixels)/self.DRRsize[0]
-        wcy = -2.0*(self.ppy_pixels)/self.DRRsize[1]
+    Camera.SetWindowCenter(wcx, wcy)
 
-        self.Camera.SetWindowCenter(wcx, wcy)
+    angle = 180.0 / np.pi * 2.0 * np.arctan2(DRRsize[1] / 2.0, focal_length_pixels)
+    Camera.SetViewAngle(angle)
 
-        angle = 180.0/np.pi*2.0*np.arctan2(self.DRRsize[1] / 2.0, self.focal_length_pixels)
-        self.Camera.SetViewAngle(angle)
-
-        self.MahfouzRenderWindow.Render()
-
-        # Initial Window to image filter
-        init_windowToImageFilter = vtk.vtkWindowToImageFilter()
-        init_windowToImageFilter.SetInput(self.MahfouzRenderWindow)
-        init_windowToImageFilter.Update()
+    MahfouzRenderWindow.Render()
+    MahfouzRenderer.ResetCamera()
 
 
-import itk
-Dimension = 2
-SizeType = itk.Size[Dimension]
-size = SizeType()
-size.Fill(3)
-IndexType = itk.Index[Dimension]
-start = IndexType()
-start[0] = 2
-start[1] = 2
+    iren = vtk.vtkRenderWindowInteractor()
+    iren.SetRenderWindow(MahfouzRenderWindow)
+    iren.Initialize()
+    MahfouzRenderWindow.Render()
+    iren.Start()
 
-RegionType = itk.ImageRegion[Dimension]
-region = RegionType(start, size)
+    # Initial Window to image filter
+    # init_windowToImageFilter = vtk.vtkWindowToImageFilter()
+    # init_windowToImageFilter.SetInput(MahfouzRenderWindow)
+    # init_windowToImageFilter.Update()
 
-testPixel1 = IndexType()
-testPixel1[0] = 1
-testPixel1[1] = 1
 
-testPixel2 = IndexType()
-testPixel2[0] = 4
-testPixel2[1] = 5
+if __name__=="__main__":
 
-print(testPixel1, end=" ")
-if region.IsInside(testPixel1):
-    print("Inside")
-else:
-    print("Outside")
+    CameraParamFilepath = "./HOPE_Test_camera_intrinsic_parameters.txt"
+    StlModelFileName = "./HOPE_Test_Stem.stl"
+    PixelType = itk.F
+    Dimension = 3
+    ScalarType = itk.D
+
+    Projector_info = {'Name': 'Mahfouz',
+                      'near': 0.1,
+                      'far': 3000,
+                      'intGsigma': 2,
+                      'intGsize': (5, 5),
+                      '3Dmodel': 'Stem'}
+
+    intrinsic_parameters = np.genfromtxt(CameraParamFilepath, delimiter=',', usecols=[1])
+    Projector_info['focal_lenght'] = intrinsic_parameters[0]
+    Projector_info['DRRspacing_x'] = intrinsic_parameters[1]
+    Projector_info['DRRspacing_y'] = intrinsic_parameters[2]
+    Projector_info['DRR_ppx'] = intrinsic_parameters[3]
+    Projector_info['DRR_ppy'] = intrinsic_parameters[4]
+    Projector_info['DRRsize_x'] = int(intrinsic_parameters[5])
+    Projector_info['DRRsize_y'] = int(intrinsic_parameters[6])
+    Projector_info['threadsPerBlock_x'] = 16
+    Projector_info['threadsPerBlock_y'] = 16
+
+
+    MahfouzProjector(Projector_info,StlModelFileName,PixelType,ScalarType)
+
+
+
+# import itk
+# Dimension = 2
+# SizeType = itk.Size[Dimension]
+# size = SizeType()
+# size.Fill(3)
+# IndexType = itk.Index[Dimension]
+# start = IndexType()
+# start[0] = 2
+# start[1] = 2
+#
+# RegionType = itk.ImageRegion[Dimension]
+# region = RegionType(start, size)
+#
+# testPixel1 = IndexType()
+# testPixel1[0] = 1
+# testPixel1[1] = 1
+#
+# testPixel2 = IndexType()
+# testPixel2[0] = 4
+# testPixel2[1] = 5
+#
+# print(testPixel1, end=" ")
+# if region.IsInside(testPixel1):
+#     print("Inside")
+# else:
+#     print("Outside")
