@@ -44,3 +44,16 @@ TwoProjectionRegistrationTestDriver.exe
                                          D:\project\PyProject_tmp\pycuda_drr-master\data\wusun_drr.tif 0                #输入的两个Fixed_image及其投影的角度
                                          D:\project\PyProject_tmp\pycuda_drr-master\data\wusun_drr_90.tif 90
                                          D:\project\PyProject_tmp\pycuda_drr-master\data\wusun.nii.gz                   #输入文件
+                                         
+                                         
+                                         
+TwoProjectionRegistrationTestDriver.exe GetDRRSiddonJacobsRayTracing -v -rp 90 -rx 3 -ry 4 -rz 2 -t 5 5 5 -iso 255.0 259.0 130 -res 0.5 0.5 -size 512 512 -o D:\software\ITK-5.1.1\build\bin\data\BoxheadDRRFullDev1_G90.tif  D:\software\ITK-5.1.1\build\bin\data\BoxheadCTFull.img
+
+
+(3)配准输入输出说明：
+    输入：输入的是两幅fixed image.这两幅fixed_image,是在相同的内外参数下，分别在正位和侧位拍摄的x图像。
+         配准的目的就是求出，CT数据在哪个外参数下，得到的DRR和这两个fixed_image的相似度最大
+    输出：6个参数，rotx,roty,rotz,tx,ty,tz
+    
+    结果如下：
+    ![Example](./img/4.png)
