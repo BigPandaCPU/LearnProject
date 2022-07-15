@@ -12,4 +12,5 @@ predict/
 /MedImgAlg/ICP/ICP_C++/ICP/Debug
 /MedImgAlg/ICP/ICP_C++/ICP/x64
 /MedImgAlg/Marching_Cubes/data
-
+/LearnNotes/Python/cpython_demo/SiddonPythonModule/build/
+/LearnNotes/Python/cpython_demo/SiddonPythonModule/lib/
