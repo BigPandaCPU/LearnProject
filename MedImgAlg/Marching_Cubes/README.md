@@ -4,7 +4,7 @@
 version0.1:
 实现marching cubes的基本功能
 
-version0.1.1:
+version0.1:
 速度优化：
 将原来的 TRIANGLE *tri = NULL;用来记录所有的triangle的指针，vector容器来替代，避免每次都要进行realloc
 //TRIANGLE *tri = NULL;
