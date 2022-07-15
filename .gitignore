@@ -11,5 +11,5 @@ predict/
 /MedImgAlg/Delaunay_Triangulation/build
 /MedImgAlg/ICP/ICP_C++/ICP/Debug
 /MedImgAlg/ICP/ICP_C++/ICP/x64
-
+/MedImgAlg/Marching_Cubes/data
 
