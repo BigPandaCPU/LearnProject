@@ -4,6 +4,12 @@ predict/
 */.idea
 */.vs
 */*.xml
+*/x64
 /LearnNotes/VTK/C++/light_demo/build/
 /MedImgAlg/Marching_Cubes/.vs/
 /LearnNotes/Python/pybind_demo/.idea/
+/MedImgAlg/Delaunay_Triangulation/build
+/MedImgAlg/ICP/ICP_C++/ICP/Debug
+/MedImgAlg/ICP/ICP_C++/ICP/x64
+
+
