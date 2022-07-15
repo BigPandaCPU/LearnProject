@@ -156,3 +156,5 @@ git branch -vv
     B.git add .  #添加到缓存
     C.git commit -m "huitui" #此时，此命令会报错，得改用强制回退
     D.git push origin master --force #强制回退，此时远端仓库回退了
+
+

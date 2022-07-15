@@ -5,5 +5,5 @@ predict/
 */.vs
 */*.xml
 /LearnNotes/VTK/C++/light_demo/build/
-/Marching_Cubes/.vs/
-/pybind_demo/.idea/
+/MedImgAlg/Marching_Cubes/.vs/
+/LearnNotes/Python/pybind_demo/.idea/

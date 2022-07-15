@@ -56,4 +56,4 @@ TwoProjectionRegistrationTestDriver.exe GetDRRSiddonJacobsRayTracing -v -rp 90 -
     输出：6个参数，rotx,roty,rotz,tx,ty,tz
     
     结果如下：
-    ![Example](./img/4.png)
+   ![Example](./img/4.png)
