@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/LearnNotes/Python/cpython_demo/SiddonClassLib/readme.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LearnNotes/Python/cpython_demo/SiddonClassLib/src/SiddonLib/siddon_class.cu" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LearnNotes/Python/cpython_demo/SiddonClassLib/src/SiddonLib/siddon_class.cuh" charset="GBK" />
     <file url="file://$PROJECT_DIR$/MedImgAlg/Delaunay_Triangulation/src/delaunay_triangulation.cpp" charset="UTF-8" />
   </component>
 </project>
