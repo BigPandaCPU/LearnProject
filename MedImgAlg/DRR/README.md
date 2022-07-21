@@ -59,3 +59,9 @@
 
 
 ![Example](DRR_time.png)
+
+# 使用
+
+1.使用C++生成DRR图像后，保存为drr.txt
+
+2.使用python进行显示图像，load_show_drr.py
