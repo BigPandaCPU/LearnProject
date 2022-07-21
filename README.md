@@ -12,7 +12,7 @@
 
 6.DRR(Digitally Reconstructed Radiograph):基于Cuda C实现的SiddonGPU算法，加速DRR生成速度
 
-7.面试常考算法题：记录一些自己之前做过的一些算法题
+
 
 ## LearnNotes
 记录学习相关的笔记
@@ -28,5 +28,7 @@
 5.git:git学习笔记
 
 6.ITK:itk学习笔记
+
+7.面试常考算法题：记录一些自己之前做过的一些算法题
 
 ... ...
