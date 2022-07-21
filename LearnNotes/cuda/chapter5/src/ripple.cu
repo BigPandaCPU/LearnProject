@@ -26,46 +26,68 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include"book.h"
+#include"../common/book.h"
+#include"../common/image.h"
 
-#define N 10
+#define DIM 1024
+#define PI 3.1415926535f
 
-__global__ void add(int* a, int* b, int* c)
+__global__ void kernel(unsigned char *ptr, int ticks)
 {
-	int tid = blockIdx.x;
-	if (tid < N)
-		c[tid] = a[tid] + b[tid];
+	int x = threadIdx.x + blockIdx.x*blockDim.x;
+	int y = threadIdx.y + blockIdx.y*blockDim.y;
+	int offset = x + y * blockDim.x*gridDim.x;
+
+	float fx = x - DIM / 2;
+	float fy = y - DIM / 2;
+	float d = sqrtf(fx*fx + fy * fy);
+	unsigned char grey = (unsigned char)(128.0f + 127.0f*
+										cos(d / 10.0f - ticks / 7.0f) / 
+										(d / 10.0f + 1.0f));
+	ptr[offset * 4 + 0] = grey;
+	ptr[offset * 4 + 1] = grey;
+	ptr[offset * 4 + 2] = grey;
+	ptr[offset * 4 + 3] = 255;
 }
 
-int main(int argc, char ** argv)
+struct DataBlock
 {
-	int a[N], b[N], c[N];
-	int* dev_a, * dev_b, * dev_c;
-	HANDLE_ERROR(cudaMalloc((void**)&dev_a, N * sizeof(int)));
-	HANDLE_ERROR(cudaMalloc((void**)&dev_b, N * sizeof(int)));
-	HANDLE_ERROR(cudaMalloc((void**)&dev_c, N * sizeof(int)));
+	unsigned char *dev_bitmap;
+	IMAGE *bitmap;
+};
 
-	for (int i = 0; i < N; i++)
+void cleanup(DataBlock* d)
+{
+	HANDLE_ERROR(cudaFree(d->dev_bitmap));
+}
+
+int main(void)
+{
+	DataBlock data;
+	IMAGE bitmap(DIM, DIM);
+	data.bitmap = &bitmap;
+	HANDLE_ERROR(cudaMalloc((void**)&data.dev_bitmap, bitmap.image_size()));
+
+	dim3 blocks(DIM / 16, DIM / 16);
+	dim3 threads(16, 16);
+
+	int ticks = 0;
+	bitmap.show_image(30);
+	while (1)
 	{
-		a[i] = -i;
-		b[i] = i * i;
+		kernel <<<blocks, threads >>> (data.dev_bitmap, ticks);
+		HANDLE_ERROR(cudaMemcpy(data.bitmap->get_ptr(), data.dev_bitmap, data.bitmap->image_size(), cudaMemcpyDeviceToHost));
+
+		ticks++;
+		char key = bitmap.show_image(30);
+		if (key == 27)
+		{
+			break;
+		}
 	}
-
-	HANDLE_ERROR(cudaMemcpy(dev_a, a, N * sizeof(int), cudaMemcpyHostToDevice));
-	HANDLE_ERROR(cudaMemcpy(dev_b, b, N * sizeof(int), cudaMemcpyHostToDevice));
-	HANDLE_ERROR(cudaMemcpy(dev_c, c, N * sizeof(int), cudaMemcpyHostToDevice));
-
-	add <<<N, 1 >>> (dev_a, dev_b, dev_c);
-	HANDLE_ERROR(cudaMemcpy(c, dev_c, N * sizeof(int), cudaMemcpyDeviceToHost));
-
-	for (int i = 0; i < N; i++)
-	{
-		printf("%d + %d = %d\n", a[i], b[i], c[i]);
-	}
-
-	cudaFree(dev_a);
-	cudaFree(dev_b);
-	cudaFree(dev_c);
-	
+	cleanup(&data);
 	return 0;
 }
+
+
+
