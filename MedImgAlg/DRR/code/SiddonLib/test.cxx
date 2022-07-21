@@ -25,14 +25,6 @@
 #include<time.h>
 
 #define EPS 1e-6 
-/*__device__ int addem( int a, int b ) {
-    return a + b;
-}
-
-__global__ void add( int a, int b, int *c ) {
-    *c = addem( a, b );
-}
-*/
 
 void HU2Myu(float* imageArray, int imageSize,float myu_water=0.2683)
 {
@@ -51,17 +43,6 @@ void HU2Myu(float* imageArray, int imageSize,float myu_water=0.2683)
 
 int main( void ) 
 {
-    /*int c;
-    int *dev_c;
-    HANDLE_ERROR( cudaMalloc( (void**)&dev_c, sizeof(int) ) );
-
-    add<<<1,1>>>( 2, 7, dev_c );
-
-    HANDLE_ERROR( cudaMemcpy( &c, dev_c, sizeof(int),
-                              cudaMemcpyDeviceToHost ) );
-    printf( "2 + 7 = %d\n", c );
-    HANDLE_ERROR( cudaFree( dev_c ) );*/
-
 
 	constexpr unsigned int Dimension = 3;
 	char file_names[100]="data/spine1.nii.gz";
@@ -148,8 +129,8 @@ int main( void )
 
 	
 
-	const float SOP = 950.0;
-	const float SOD = 350.0;
+	const float VCS = 950.0; //volume center to source point
+	const float VCD = 350.0; //volume center to detector
 	float volume_center_x = X0 + movSize[0] / 2.0*movSpacing[0];
 	float volume_center_y = Y0 + movSize[1] / 2.0*movSpacing[1];
 	float volume_center_z = Z0 + movSize[2] / 2.0*movSpacing[2];
@@ -157,7 +138,7 @@ int main( void )
 
 	float *source_point = new float[Dimension];
 	source_point[0] = volume_center_x;
-	source_point[1] = volume_center_y - SOP;
+	source_point[1] = volume_center_y - VCS;
 	source_point[2] = volume_center_z;
 
 	float *drrArray = new float[DRRSize[0] * DRRSize[1] * DRRSize[2]];
@@ -177,7 +158,7 @@ int main( void )
 	size[2] = DRRSize[1]; // size along Z
 
 	float drrOrigin_x = volume_center_x - DRRSpacing[0] * (size[0] - 1.0) / 2.0;
-	float drrOrigin_y = volume_center_y + SOD;
+	float drrOrigin_y = volume_center_y + VCD;
 	float drrOrigin_z = volume_center_z - DRRSpacing[2] * (size[2] - 1.0) / 2.0;
 
 	const itk::SpacePrecisionType drrOigin[Dimension] = { drrOrigin_x, drrOrigin_y, drrOrigin_z };
