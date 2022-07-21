@@ -2,7 +2,7 @@
 基于CUDA C实现的
 源代码参考 https://github.com/fabio86d/CUDA_DigitallyReconstructedRadiographs
 
-#源代码存在的问题：
+# 源代码存在的问题：
 1.生成的DRR只能是DRRsize_x == DRRsize_y，否则会报错
 改进：
 完善了生成DRR接口，将DRRsize_x和DRRsize_y参数传递给kernel函数，进行DRR计算
@@ -11,12 +11,12 @@
 补充C++调用Demo
 
 
-#编译
+# 编译
 1.操作系统 win10, GPU, cmake, VS2015/2017/2019
 2.默认已经安装好Cuda，并且已经在本地编译安装好ITK
 3.直接在Cmake-gui中，进行编译
 
-#补充说明,坐标系统：
+# 补充说明,坐标系统：
 1. 在C++demo中，DRR生成的坐标系是DICOM中的世界坐标。
 3D CT数据的中心点(volume_center_x, volume_center_y, volume_center_z)
 
@@ -34,7 +34,7 @@ detecotr_plane position:
 (volume_center_x + DRRsize_x/2.0*DRRspacing_x, volume_center_y + VCD, volume_center_z + DRRsize_y/2.0*DRRspacing_y)
 
 
-#DRR生成时间对比
+# DRR生成时间对比
 测试数据大小(512, 512, 1609)，生成DRR大小(512, 1609)
 1.ITK  https://github.com/InsightSoftwareConsortium/ITKTwoProjectionRegistration  0.27s
 
