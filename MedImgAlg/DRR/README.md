@@ -30,9 +30,9 @@
 
 ## 2.放射源source pointd点位置：
 
-  VCP:Volume_center to patient
+  VCS:Volume_center to source
   
-  source_point = (volume_center_x, volume_center_y - VCP, volume_center_z)
+  source_point = (volume_center_x, volume_center_y - VCS, volume_center_z)
 
 
 ## 3.接受平面 detector plane设置在：
