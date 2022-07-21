@@ -13,19 +13,24 @@
 
 # 编译
 1.操作系统 win10, GPU, cmake, VS2015/2017/2019
+
 2.默认已经安装好Cuda，并且已经在本地编译安装好ITK
+
 3.直接在Cmake-gui中，进行编译
 
 # 补充说明,坐标系统：
 1. 在C++demo中，DRR生成的坐标系是DICOM中的世界坐标。
+
 3D CT数据的中心点(volume_center_x, volume_center_y, volume_center_z)
 
 2. 放射源source pointd点位置：
+
 VCP:Volume_center to patient
 source_point = (volume_center_x, volume_center_y - VCP, volume_center_z)
 
 
 3.接受平面 detector plane设置在：
+
 VCD:Volume_center to detector
 DRRsize_x DRRsize_y DRRspacing_x, DRRspacing_y
 detecotr_plane position:
