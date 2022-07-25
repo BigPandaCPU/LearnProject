@@ -605,7 +605,7 @@ void SiddonGpu::generateDRR(float *source,
 	//}
 
 	// launch kernel
-	cuda_kernel << <number_of_blocks, threads_per_block >> >(d_drr_array,
+	cuda_kernel <<<number_of_blocks, threads_per_block >>>(d_drr_array,
 															 d_source,
 															 d_DestArray,
 															 m_DRRsizeX,
@@ -632,7 +632,7 @@ void SiddonGpu::generateDRR(float *source,
 	cudaMemcpy(drrArray, d_drr_array, m_DrrMemSize, cudaMemcpyDeviceToHost);
 
 	// Clean up device DRR array
-cleanup:
+   //cleanup:
 	cudaFree(d_drr_array);
 	cudaFree(d_source);
 	cudaFree(d_DestArray);

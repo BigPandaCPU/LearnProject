@@ -23,8 +23,11 @@
 #include "itkVector.h"
 #include "itkPointSet.h"
 #include<time.h>
+#include<math.h>
 
 #define EPS 1e-6 
+
+#define PI acos(-1)
 
 void HU2Myu(float* imageArray, int imageSize,float myu_water=0.2683)
 {
@@ -41,17 +44,65 @@ void HU2Myu(float* imageArray, int imageSize,float myu_water=0.2683)
 	}
 }
 
-int main( void ) 
+void getRigidMotionMatFromEuler(float **rotTransMatrix, float rotx = 0.0f, float roty = 0.0f, float rotz = 0.0f, float transx = 0.0f, float transy = 0.0f, float transz = 0.0f)
 {
+	float rotXMatrix[3][3] = { 0.0f };
+	float rotYMatrix[3][3] = { 0.0f };
+	float rotZMatrix[3][3] = { 0.0f };
 
+	rotXMatrix[0][0] = 1.0f;
+	rotXMatrix[1][1] = cos(rotx);
+	rotXMatrix[1][2] = -sin(rotx);
+	rotXMatrix[2][1] = sin(rotx);
+	rotXMatrix[2][2] = cos(rotx);
+
+	rotYMatrix[0][0] = cos(roty);
+	rotYMatrix[0][2] = sin(roty);
+	rotYMatrix[1][1] = 1.0f;
+	rotYMatrix[2][0] = -sin(roty);
+	rotYMatrix[2][2] = cos(roty);
+
+	rotZMatrix[0][0] = cos(rotz);
+	rotZMatrix[0][1] = -sin(rotz);
+	rotZMatrix[1][0] = sin(rotz);
+	rotZMatrix[1][1] = cos(rotz);
+	rotZMatrix[2][2] = 1.0f;
+
+	float tmp[3][3] = { 0.0f };
+
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+			tmp[i][j] = rotXMatrix[i][0] * rotYMatrix[0][j] +
+						rotXMatrix[i][1] * rotYMatrix[1][j] +
+						rotXMatrix[i][2] * rotYMatrix[2][j];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+			rotTransMatrix[i][j] = tmp[i][0] * rotZMatrix[0][j] +
+								   tmp[i][1] * rotZMatrix[1][j] +
+								   tmp[i][2] * rotZMatrix[2][j];
+
+	}
+
+	rotTransMatrix[0][3] = transx;
+	rotTransMatrix[1][3] = transy;
+	rotTransMatrix[2][3] = transz;
+}
+
+
+int main(void)
+{
 	constexpr unsigned int Dimension = 3;
-	char file_names[100]="data/spine1.nii.gz";
+	char file_names[100] = "data/spine1.nii.gz";
 	using PixelType = float;
 	using ImageType = itk::Image<PixelType, Dimension>;
 
 	ImageType::Pointer image = itk::ReadImage<ImageType>(file_names);
 	image->Update();
-	printf("spacing[0] = %f\n",image->GetSpacing()[0]);
+	printf("spacing[0] = %f\n", image->GetSpacing()[0]);
 	printf("spacing[1] = %f\n", image->GetSpacing()[1]);
 	printf("spacing[2] = %f\n", image->GetSpacing()[2]);
 
@@ -114,23 +165,21 @@ int main( void )
 	Z0 = image->GetOrigin()[2];
 
 	DRRSize = new int[Dimension];
-	DRRSize[0] = 1300;
+	DRRSize[0] = 1500;
 	DRRSize[1] = 1500;
 	DRRSize[2] = 1;
 
 	float *DRRSpacing = new float[Dimension];
-	DRRSpacing[0] = 0.25;
+	DRRSpacing[0] = 0.3;
 	DRRSpacing[1] = 1.0;
-	DRRSpacing[2] = 0.25;
+	DRRSpacing[2] = 0.3;
 
 
 	SiddonGpu* siddonGpu = new SiddonGpu(numThreadsPerBlock, movImgArray, movSize, movSpacing, X0, Y0, Z0, DRRSize);
 
 
-	
-
-	const float VCS = 950.0; //volume center to source point
-	const float VCD = 350.0; //volume center to detector
+	const float VCS = 950.0;
+	const float VCD = 300.0;
 	float volume_center_x = X0 + movSize[0] / 2.0*movSpacing[0];
 	float volume_center_y = Y0 + movSize[1] / 2.0*movSpacing[1];
 	float volume_center_z = Z0 + movSize[2] / 2.0*movSpacing[2];
@@ -174,7 +223,7 @@ int main( void )
 	drrImage->SetDirection(image->GetDirection());
 	drrImage->SetSpacing(drrSpacing);
 	drrImage->SetOrigin(drrOigin);
-	
+
 	std::cout << "\nstep2:" << std::endl;
 
 	using VectorPixelType = itk::Vector<float, Dimension>;
@@ -197,13 +246,132 @@ int main( void )
 
 	std::cout << "\nstep4:" << std::endl;
 
+	for (int i = 0; i < 15; i++)
+	{
+		std::cout << "DestArray[" << i << "]=" << DestArray[i] << std::endl;
+	}
+
 	clock_t time_start, time_end;
 	float total_time;
 	time_start = clock();
-	siddonGpu->generateDRR(source_point, DestArray, drrArray);
+
+
+	float **rotTransMatrix = new float*[3];
+	for (int i = 0; i < 4; i++)
+	{
+		rotTransMatrix[i] = new float[4];
+	}
+	float volumeCenterTransMatrix[3][4] = { 0.0f };
+	float invVolumeCenterTransMatrix[3][4] = { 0.0f };
+
+	volumeCenterTransMatrix[0][0] = 1.0f;
+	volumeCenterTransMatrix[1][1] = 1.0f;
+	volumeCenterTransMatrix[2][2] = 1.0f;
+	volumeCenterTransMatrix[0][3] = -volume_center_x;
+	volumeCenterTransMatrix[1][3] = -volume_center_y;
+	volumeCenterTransMatrix[2][3] = -volume_center_z;
+
+	invVolumeCenterTransMatrix[0][0] = 1.0f;
+	invVolumeCenterTransMatrix[1][1] = 1.0f;
+	invVolumeCenterTransMatrix[2][2] = 1.0f;
+
+	invVolumeCenterTransMatrix[0][3] = volume_center_x;
+	invVolumeCenterTransMatrix[1][3] = volume_center_y;
+	invVolumeCenterTransMatrix[2][3] = volume_center_z;
+
+	float tmp[3][4] = { 0.0f };
+	float finalRotTransMatrix[3][4] = { 0.0f };
+
+	float *new_source_point = new float[Dimension];
+	float *new_DestArray = new float[DRRSize[0] * DRRSize[1] * Dimension];
+
+	const int N = 12;
+
+	for (int rotYI = -N; rotYI < N + 1; rotYI++)
+	{
+		//for (int j = -N; j < N + 1; j++)
+
+		{
+			float roty = (-8*5.0) / 180.0*PI;
+			//float rotx = (j*5.0) / 180.0*PI;
+
+			getRigidMotionMatFromEuler(rotTransMatrix, 0.0, roty, 0.0, 0.0, 0.0, 0.0);
+
+			for (int i = 0; i < 3; i++)
+			{
+				for (int j = 0; j < 3; j++)
+				{
+					tmp[i][j] = invVolumeCenterTransMatrix[i][0] * rotTransMatrix[0][j] +
+						invVolumeCenterTransMatrix[i][1] * rotTransMatrix[1][j] +
+						invVolumeCenterTransMatrix[i][2] * rotTransMatrix[2][j];
+				}
+
+				tmp[i][3] = invVolumeCenterTransMatrix[i][0] * rotTransMatrix[0][3] +
+					invVolumeCenterTransMatrix[i][1] * rotTransMatrix[1][3] +
+					invVolumeCenterTransMatrix[i][2] * rotTransMatrix[2][3] +
+					invVolumeCenterTransMatrix[i][3] * 1.0f;
+			}
+
+			for (int i = 0; i < 3; i++)
+			{
+				for (int j = 0; j < 3; j++)
+				{
+
+					finalRotTransMatrix[i][j] = tmp[i][0] * volumeCenterTransMatrix[0][j] +
+						tmp[i][1] * volumeCenterTransMatrix[1][j] +
+						tmp[i][2] * volumeCenterTransMatrix[2][j];
+				}
+				finalRotTransMatrix[i][3] = tmp[i][0] * volumeCenterTransMatrix[0][3] +
+					tmp[i][1] * volumeCenterTransMatrix[1][3] +
+					tmp[i][2] * volumeCenterTransMatrix[2][3] +
+					tmp[i][3] * 1.0f;
+			}
+
+
+			for (int i = 0; i < Dimension; i++)
+			{
+				new_source_point[i] = finalRotTransMatrix[i][0] * source_point[0] +
+					finalRotTransMatrix[i][1] * source_point[1] +
+					finalRotTransMatrix[i][2] * source_point[2] +
+					finalRotTransMatrix[i][3] * 1.0f;
+			}
+
+			for (int i = 0; i < DRRSize[0] * DRRSize[1]; i++)
+			{
+				for (int j = 0; j < Dimension; j++)
+				{
+					new_DestArray[i*Dimension + j] = finalRotTransMatrix[j][0] * DestArray[i*Dimension + 0] +
+						finalRotTransMatrix[j][1] * DestArray[i*Dimension + 1] +
+						finalRotTransMatrix[j][2] * DestArray[i*Dimension + 2] +
+						finalRotTransMatrix[j][3] * 1.0f;
+				}
+			}
+
+			siddonGpu->generateDRR(new_source_point, new_DestArray, drrArray);
+
+			char saveFileName[100];
+			sprintf(saveFileName, "drr_rotY_%d.txt", rotYI*5);
+			std::cout << saveFileName << std::endl;
+
+			FILE *fp = fopen(saveFileName, "w");
+			for (int j = 0; j < DRRSize[1]; j++)
+			{
+				for (int i = 0; i < DRRSize[0]; i++)
+				{
+					fprintf(fp, "%f  ", drrArray[j*DRRSize[0] + i]);
+				}
+				fprintf(fp, "\n");
+			}
+			fclose(fp);
+
+
+		}
+	}
+		
+
 	time_end = clock();
 	total_time = (float)(time_end - time_start) / CLOCKS_PER_SEC;
-	std::cout << "DRR time:" << total_time << std::endl;
+	std::cout << "DRR times:" <<4*N*N<<", total times:"<<total_time << std::endl;
 	std::cout << "\nstep5:" << std::endl;
 	
 
@@ -211,6 +379,8 @@ int main( void )
 	std::cout << drrArray[0] << std::endl;
 	std::cout << drrArray[1] << std::endl;
 	std::cout << drrArray[2] << std::endl;
+
+
 	FILE *fp = fopen("drr.txt", "w");
 	for (int j = 0; j < DRRSize[1]; j++)
 	{
