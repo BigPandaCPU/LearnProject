@@ -15,8 +15,9 @@
 #include <iostream>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-
-
+#include"book.h"
+#include<time.h>
+#include<windows.h>
 __device__ const float epsilon = 2.22045e-016; // to compare double float values
 
 // auxiliary functions
@@ -442,13 +443,18 @@ __global__ void cuda_kernel(float *DRRarray,
 
 				if (arrayIdx_old > 0.) {
 					// update density value
-					if (movImgArray[arrayIdx_old] != 0.) {
+					if (arrayIdx_old < MovSize[0] * MovSize[1] * MovSize[2])
+					{
+						if (movImgArray[arrayIdx_old] != 0.)
+						{
 
-						density_value += movImgArray[arrayIdx_old] * l;
+							density_value += movImgArray[arrayIdx_old] * l;
 
-						//std::cout << density_value << std::endl;
+							//std::cout << density_value << std::endl;
 
+						}
 					}
+
 				}
 
 				// update arrayIdx
@@ -530,6 +536,10 @@ SiddonGpu::SiddonGpu(int *NumThreadsPerBlock,
 	//std::cout << "Siddon object Initialization: GPU memory prepared \n" << std::endl;
 	//printf("ctor %p\n", this); // in constructors
 
+	HANDLE_ERROR(cudaMalloc((void**)&d_drr_array, m_DrrMemSize));
+	HANDLE_ERROR(cudaMalloc((void**)&d_source, 3 * sizeof(float)));
+	HANDLE_ERROR(cudaMalloc((void**)&d_DestArray, m_DestMemSize));
+
 }
 
 /**
@@ -545,6 +555,10 @@ SiddonGpu::~SiddonGpu() {
 	std::cout << "Siddon object destruction: GPU memory cleared \n" << std::endl;
 	//printf("dtor %p\n", this); // in destructor
 
+	cudaFree(d_drr_array);
+	cudaFree(d_source);
+	cudaFree(d_DestArray);
+
 }
 
 /**
@@ -557,31 +571,24 @@ SiddonGpu::~SiddonGpu() {
 **/
 void SiddonGpu::generateDRR(float *source,
 							float *DestArray,
-							float *drrArray) {
+							float *drrArray) 
+{
 
 	cudaError_t ierrAsync;
 	cudaError_t ierrSync;
 
 	// declare pointer to device memory for output DRR array
-	float *d_DestArray;
-	float *d_source;
-	float *d_drr_array;
 
 	// allocate space on device
-	cudaMalloc((void**)&d_drr_array, m_DrrMemSize);
-	cudaMalloc((void**)&d_source, 3 * sizeof(float));
-	cudaMalloc((void**)&d_DestArray, m_DestMemSize);
+
 
 	// Copy source and destination to device
-	cudaMemcpy(d_DestArray, DestArray, m_DestMemSize, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_source, source, 3 * sizeof(float), cudaMemcpyHostToDevice);
-
-	//std::cout << "DRR generation: GPU memory prepared \n" << std::endl;
+	HANDLE_ERROR(cudaMemcpy(d_DestArray, DestArray, m_DestMemSize, cudaMemcpyHostToDevice));
+	HANDLE_ERROR(cudaMemcpy(d_source, source, 3 * sizeof(float), cudaMemcpyHostToDevice));
 
 	// determine number of required blocks
 	dim3 threads_per_block(m_NumThreadsPerBlock[0], m_NumThreadsPerBlock[1], 1);
 	dim3 number_of_blocks((m_DRRsize[0] / threads_per_block.x) + 1, (m_DRRsize[1] / threads_per_block.y) + 1, 1);
-
 	//// Query GPU device
 	//cudaDeviceProp prop;
 	//cudaGetDeviceProperties(&prop, 0);
@@ -614,8 +621,6 @@ void SiddonGpu::generateDRR(float *source,
 															 m_d_MovSize,
 															 m_d_MovSpacing,
 															 m_X0, m_Y0, m_Z0);
-
-
 	// Check for errors in Kernel launch
 	ierrSync = cudaGetLastError();
 	ierrAsync = cudaDeviceSynchronize(); // Wait for the GPU to finish
@@ -627,16 +632,10 @@ void SiddonGpu::generateDRR(float *source,
 		printf("Cuda Async error: %s\n", cudaGetErrorString(ierrAsync)); 
 		//goto cleanup;
 	}
-
 	// Copy result to host array
 	cudaMemcpy(drrArray, d_drr_array, m_DrrMemSize, cudaMemcpyDeviceToHost);
 
 	// Clean up device DRR array
-   //cleanup:
-	cudaFree(d_drr_array);
-	cudaFree(d_source);
-	cudaFree(d_DestArray);
-	//std::cout << "DRR generation: GPU memory cleared \n" << std::endl;
 
 	return;
 

@@ -76,4 +76,9 @@ private:
 	int m_DrrMemSize;
 	int m_DestMemSize;
 
+	float *d_DestArray;
+	float *d_source;
+	float *d_drr_array;
+
+
 };

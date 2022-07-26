@@ -239,17 +239,17 @@ int main(void)
 	PhyImageType::Pointer output = physicalPointerImagefilter->GetOutput();
 	VectorPixelType *yy = output->GetBufferPointer();
 	DestArray = yy->data();
-	std::cout << yy[0] << std::endl;
-	std::cout << yy[1] << std::endl;
-	std::cout << yy[2] << std::endl;
-	std::cout << yy[3] << std::endl;
+	//std::cout << yy[0] << std::endl;
+	//std::cout << yy[1] << std::endl;
+	//std::cout << yy[2] << std::endl;
+	//std::cout << yy[3] << std::endl;
 
 	std::cout << "\nstep4:" << std::endl;
 
-	for (int i = 0; i < 15; i++)
-	{
-		std::cout << "DestArray[" << i << "]=" << DestArray[i] << std::endl;
-	}
+	//for (int i = 0; i < 15; i++)
+	//{
+	//	std::cout << "DestArray[" << i << "]=" << DestArray[i] << std::endl;
+	//}
 
 	clock_t time_start, time_end;
 	float total_time;
@@ -289,13 +289,12 @@ int main(void)
 
 	for (int rotYI = -N; rotYI < N + 1; rotYI++)
 	{
-		//for (int j = -N; j < N + 1; j++)
-
+		for (int rotZJ = -N; rotZJ < N + 1; rotZJ++)
 		{
-			float roty = (-8*5.0) / 180.0*PI;
-			//float rotx = (j*5.0) / 180.0*PI;
+			float roty = (rotYI*5.0) / 180.0*PI;
+			float rotz = (rotZJ*5.0) / 180.0*PI;
 
-			getRigidMotionMatFromEuler(rotTransMatrix, 0.0, roty, 0.0, 0.0, 0.0, 0.0);
+			getRigidMotionMatFromEuler(rotTransMatrix, 0.0, roty, rotz, 0.0, 0.0, 0.0);
 
 			for (int i = 0; i < 3; i++)
 			{
@@ -349,24 +348,21 @@ int main(void)
 
 			siddonGpu->generateDRR(new_source_point, new_DestArray, drrArray);
 
-			char saveFileName[100];
-			sprintf(saveFileName, "drr_rotY_%d.txt", rotYI*5);
-			std::cout << saveFileName << std::endl;
-
-			FILE *fp = fopen(saveFileName, "w");
-			for (int j = 0; j < DRRSize[1]; j++)
-			{
-				for (int i = 0; i < DRRSize[0]; i++)
-				{
-					fprintf(fp, "%f  ", drrArray[j*DRRSize[0] + i]);
-				}
-				fprintf(fp, "\n");
-			}
-			fclose(fp);
-
-
 		}
+
 	}
+	//char saveFileName[100] = "drr_rotY.txt";
+
+	//FILE *fp = fopen(saveFileName, "w");
+	//for (int j = 0; j < DRRSize[1]; j++)
+	//{
+	//	for (int i = 0; i < DRRSize[0]; i++)
+	//	{
+	//		fprintf(fp, "%f  ", drrArray[j*DRRSize[0] + i]);
+	//	}
+	//	fprintf(fp, "\n");
+	//}
+	//fclose(fp);
 		
 
 	time_end = clock();
