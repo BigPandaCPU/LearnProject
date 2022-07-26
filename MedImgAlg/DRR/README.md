@@ -20,7 +20,7 @@
 
 	if (arrayIdx_old > 0.) {
 		// update density value
-		if (arrayIdx_old < MovSize[0] * MovSize[1] * MovSize[2]) //add check
+		if (arrayIdx_old < MovSize[0] * MovSize[1] * MovSize[2]) // add check to avoid illegal memory access 
 		{
 			if (movImgArray[arrayIdx_old] != 0.)
 			{
