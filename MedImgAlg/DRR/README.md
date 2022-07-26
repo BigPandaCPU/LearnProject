@@ -4,7 +4,8 @@
 源代码参考 https://github.com/fabio86d/CUDA_DigitallyReconstructedRadiographs
 
 # 源代码存在的问题：
-1.生成的DRR只能是DRRsize_x == DRRsize_y，否则会报错
+
+## 1.生成的DRR只能是DRRsize_x == DRRsize_y，否则会报错
 
 改进：
 
@@ -41,11 +42,11 @@
 		
 		
 
-2.没有C+++调用的demo
+## 2.没有C+++调用的demo
 
 补充C++调用Demo
 
-3.bug修改。在生成DRR时，cuda内存越界访问
+## 3.bug修改。在生成DRR时，cuda内存越界访问
 
 	update_idx(i_v, j_v, k_v, MovSize[0], MovSize[1], arrayIdx);
 
@@ -64,7 +65,7 @@
 	arrayIdx_old = arrayIdx;
 
 
-4.增加旋转平移矩阵的计算
+## 4.增加旋转平移矩阵的计算
 
 	void getRigidMotionMatFromEuler(float **rotTransMatrix, float rotx, float roty, float rotz, float transx, float transy, float transz)
 	{
@@ -115,7 +116,7 @@
 	}
 
 
-5.增加多次循环调用，在不同旋转角度下的
+## 5.增加多次循环调用，在不同旋转角度下的
 
 
 # 编译
