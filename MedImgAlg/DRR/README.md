@@ -16,21 +16,21 @@
 
 3.bug修改。在生成DRR时，cuda内存越界访问
 
-				update_idx(i_v, j_v, k_v, MovSize[0], MovSize[1], arrayIdx);
+	update_idx(i_v, j_v, k_v, MovSize[0], MovSize[1], arrayIdx);
 
-				if (arrayIdx_old > 0.) {
-					// update density value
-					if (arrayIdx_old < MovSize[0] * MovSize[1] * MovSize[2]) //add check
-					{
-						if (movImgArray[arrayIdx_old] != 0.)
-						{
-							density_value += movImgArray[arrayIdx_old] * l;
-							//std::cout << density_value << std::endl;
-						}
-					}
-				}
-				// update arrayIdx
-				arrayIdx_old = arrayIdx;
+	if (arrayIdx_old > 0.) {
+		// update density value
+		if (arrayIdx_old < MovSize[0] * MovSize[1] * MovSize[2]) //add check
+		{
+			if (movImgArray[arrayIdx_old] != 0.)
+			{
+				density_value += movImgArray[arrayIdx_old] * l;
+				//std::cout << density_value << std::endl;
+			}
+		}
+	}
+	// update arrayIdx
+	arrayIdx_old = arrayIdx;
 
 
 4.增加旋转平移矩阵的计算
