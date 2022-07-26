@@ -10,6 +10,37 @@
 
 完善了生成DRR接口，将DRRsize_x和DRRsize_y参数传递给kernel函数，进行DRR计算
 
+	__global__ void cuda_kernel(float *DRRarray,
+		float *source,
+		float *DestArray,
+		int DRRsizeX,    // add DRRsizeX param
+		int DRRsizeY,    // add DRRsizeY param
+		float *movImgArray,
+		int *MovSize,
+		float *MovSpacing,
+		float X0, float Y0, float Z0) 
+		{
+		
+			// DRR image indeces
+			int x = blockIdx.x * blockDim.x + threadIdx.x;
+			int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+			if (x > DRRsizeX)          // add check 
+				return;
+			if (y > DRRsizeY)          // add check 
+				return;
+
+			// DRR array index
+			int DRRidx = x + DRRsizeX * y;
+
+			//printf("Thread index %i\n", DRRidx);
+
+			if (DRRidx < DRRsizeX * DRRsizeY) { // checks if thread index is within the length of the DRR array
+			...  ...
+		}
+		
+		
+
 2.没有C+++调用的demo
 
 补充C++调用Demo
@@ -34,6 +65,55 @@
 
 
 4.增加旋转平移矩阵的计算
+
+	void getRigidMotionMatFromEuler(float **rotTransMatrix, float rotx, float roty, float rotz, float transx, float transy, float transz)
+	{
+		float rotXMatrix[3][3] = { 0.0f };
+		float rotYMatrix[3][3] = { 0.0f };
+		float rotZMatrix[3][3] = { 0.0f };
+
+		rotXMatrix[0][0] = 1.0f;
+		rotXMatrix[1][1] = cos(rotx);
+		rotXMatrix[1][2] = -sin(rotx);
+		rotXMatrix[2][1] = sin(rotx);
+		rotXMatrix[2][2] = cos(rotx);
+
+		rotYMatrix[0][0] = cos(roty);
+		rotYMatrix[0][2] = sin(roty);
+		rotYMatrix[1][1] = 1.0f;
+		rotYMatrix[2][0] = -sin(roty);
+		rotYMatrix[2][2] = cos(roty);
+
+		rotZMatrix[0][0] = cos(rotz);
+		rotZMatrix[0][1] = -sin(rotz);
+		rotZMatrix[1][0] = sin(rotz);
+		rotZMatrix[1][1] = cos(rotz);
+		rotZMatrix[2][2] = 1.0f;
+
+		float tmp[3][3] = { 0.0f };
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+				tmp[i][j] = rotXMatrix[i][0] * rotYMatrix[0][j] +
+							rotXMatrix[i][1] * rotYMatrix[1][j] +
+							rotXMatrix[i][2] * rotYMatrix[2][j];
+		}
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+				rotTransMatrix[i][j] = tmp[i][0] * rotZMatrix[0][j] +
+									   tmp[i][1] * rotZMatrix[1][j] +
+									   tmp[i][2] * rotZMatrix[2][j];
+
+		}
+
+		rotTransMatrix[0][3] = transx;
+		rotTransMatrix[1][3] = transy;
+		rotTransMatrix[2][3] = transz;
+	}
+
 
 5.增加多次循环调用，在不同旋转角度下的
 
