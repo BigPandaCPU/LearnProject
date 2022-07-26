@@ -41,13 +41,13 @@
   source_point = (volume_center_x, volume_center_y - VCS, volume_center_z)
 
 
-## 3.接受平面 detector plane设置在：
+## 3.接收平面 detector plane设置在：
 
   VCD:Volume_center to detector
 
   DRRsize_x, DRRsize_y, DRRspacing_x, DRRspacing_y
   
-  detecotr_plane position:
+  detector_plane position:
 
   (volume_center_x - DRRsize_x/2.0*DRRspacing_x, volume_center_y + VCD, volume_center_z - DRRsize_y/2.0*DRRspacing_y)
   
