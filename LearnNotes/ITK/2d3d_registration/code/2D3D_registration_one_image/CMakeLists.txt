@@ -17,4 +17,5 @@ add_executable(TwoProjectionRegistrationTestDriver
 					src/itkNormalizedCorrelationTwoImageToOneImageMetric.h
 					src/TwoProjectionRegistrationTestDriver.cxx )
 target_link_libraries(TwoProjectionRegistrationTestDriver ${ITK_LIBRARIES})
+# TwoProjection2D3DRegistration  -v -res 0.5 0.5 -iso 255 259 130 -o D:/software/InsightToolkit-5.2.1/build/data/BoxheadDRRFullDev1_G0_Reg.tif  D:/software/InsightToolkit-5.2.1/build/data/BoxheadDRRFullDev1_G0.tif 0  D:\software\InsightToolkit-5.2.1\build\data\BoxheadCTFull.img
 
