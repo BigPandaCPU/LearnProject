@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+project(chapter7 LANGUAGES CXX CUDA)
+set(OpenCV_DIR "D:/software/opencv/build")
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+link_directories(${OpenCV_LIBRARY_DIRS})
+
+add_executable(heat src/heat.cu common/book.h)
+set_target_properties(heat PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+target_link_libraries(heat ${OpenCV_LIBRARIES})

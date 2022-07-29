@@ -49,6 +49,8 @@ TwoProjectionRegistrationTestDriver.exe
                                          
 TwoProjectionRegistrationTestDriver.exe GetDRRSiddonJacobsRayTracing -v -rp 90 -rx 3 -ry 4 -rz 2 -t 5 5 5 -iso 255.0 259.0 130 -res 0.5 0.5 -size 512 512 -o D:\software\ITK-5.1.1\build\bin\data\BoxheadDRRFullDev1_G90.tif  D:\software\ITK-5.1.1\build\bin\data\BoxheadCTFull.img
 
+TwoProjectionRegistrationTestDriver.exe TwoProjection2D3DRegistration -res 0.5 0.5 0.5 0.5 -iso 255 259 130 -o ./data/BoxheadDRRFullDev1_G0_Reg.tif ./data/BoxheadDRRFullDev1_G90_Reg.tif ./data/BoxheadDRRFullDev1_G0.tif 0 ./data/BoxheadDRRFullDev1_G90.tif 90 D:\software\InsightToolkit-5.2.1\build\bin\data\BoxheadCTFull.img
+
 
 (3)配准输入输出说明：
     输入：输入的是两幅fixed image.这两幅fixed_image,是在相同的内外参数下，分别在正位和侧位拍摄的x图像。
@@ -57,3 +59,53 @@ TwoProjectionRegistrationTestDriver.exe GetDRRSiddonJacobsRayTracing -v -rp 90 -
     
     结果如下：
    ![Example](./img/4.png)
+   
+
+## 补充
+
+### 1.code/2D3D_registration_one_image   此代码是对一张fixed_image进行配准的
+    
+    代码调用：
+    
+    TwoProjection2D3DRegistration  -v -res 0.5 0.5 -iso 255 259 130 -o D:/software/InsightToolkit-5.2.1/build/data/BoxheadDRRFullDev1_G0_Reg.tif  D:/software/InsightToolkit-5.2.1/build/data/BoxheadDRRFullDev1_G0.tif 0  D:\software\InsightToolkit-5.2.1\build\data\BoxheadCTFull.img
+        
+
+### 2.code/2D3D_registration_two_image   此代码是对两张fixed_image进行配准的
+
+    代码调用
+    
+    TwoProjection2D3DRegistration  -v -res 0.5 0.5 0.5 0.5  
+                                   -iso 255 259 130 
+                                   -o D:/software/InsightToolkit-5.2.1/build/data/BoxheadDRRFullDev1_G0_Reg.tif 
+                                   D:/software/InsightToolkit-5.2.1/build/data/BoxheadDRRFullDev1_G90_Reg.tif  
+                                   D:/software/InsightToolkit-5.2.1/build/data/BoxheadDRRFullDev1_G0.tif 0  
+                                   D:/software/InsightToolkit-5.2.1/build/data/BoxheadDRRFullDev1_G90.tif 90
+                                   D:\software\InsightToolkit-5.2.1\build\data\BoxheadCTFull.img
+### 3.配准用时对比
+
+测试数据大小  ![Example](./img/测试数据大小.png)
+
+单侧配准用时  ![Example](./img/单侧配准用时.png)
+
+
+正侧位配准用时  ![Example](./img/正侧位配准用时.png)
+
+
+单侧配准：
+
+    用时 172.5s
+    
+    配准结果：（2.965， 4.122， 2.069， 4.859， 5.072， 5.022 ）, 
+    
+    配准误差为（0.035， 0.122， 0.069， 0.141， 0.072， 0.22）
+    
+正侧位配准：
+
+    用时 187.2s
+    
+    配准结果：（3.024， 3.946， 2.019， 5.039， 5.016， 4.995 ）, 
+    
+    配准误差为（0.024， 0.054， 0.019， 0.039， 0.016， 0.005）
+ 
+ 
+ **正侧位的配准精度高于单侧配准精度**

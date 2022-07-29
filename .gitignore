@@ -18,3 +18,6 @@ predict/
 /LearnNotes/cuda/chapter4/build/
 /LearnNotes/cuda/chapter5/build/
 /LearnNotes/cuda/chapter3/build/
+/LearnNotes/ITK/2d3d_registration/code/TestPowell/build/
+/LearnNotes/ITK/2d3d_registration/code/2D3D_registration_one_image/build/
+/LearnNotes/ITK/2d3d_registration/code/2D3D_registration_two_image/build/
