@@ -1,3 +1,0 @@
-D:/project/LearnProject/LearnNotes/cuda/chapter7/build/CMakeFiles/heat.dir
-D:/project/LearnProject/LearnNotes/cuda/chapter7/build/CMakeFiles/ALL_BUILD.dir
-D:/project/LearnProject/LearnNotes/cuda/chapter7/build/CMakeFiles/ZERO_CHECK.dir
